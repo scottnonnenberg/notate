@@ -1,0 +1,13 @@
+test
+coverage
+scripts
+src
+assets
+
+.gitignore
+.npmignore
+.eslintignore
+.eslintrc.js
+.istanbul.yml
+
+*.sublime-*

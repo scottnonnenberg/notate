@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <meta http-equiv='Content-Type' content='text/html' charset='UTF-8'>
+    <title>notate tests!</title>
+    <link rel="stylesheet" href="/node_modules/mocha/mocha.css">
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="/node_modules/mocha/mocha.js"></script>
+    <script type="text/javascript">
+      mocha.setup({
+        ui: 'bdd'
+      });
+    </script>
+    <script src="/dist/client/test/all.js"></script>
+    <script type="text/javascript">
+      mocha.run();
+    </script>
+  </body>
+</html>

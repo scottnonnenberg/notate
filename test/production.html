@@ -1,0 +1,37 @@
+<html>
+  <head>
+    <meta http-equiv='Content-Type' content='text/html' charset='UTF-8'>
+    <title>notate tests!</title>
+    <link rel="stylesheet" href="/node_modules/mocha/mocha.css">
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="/node_modules/mocha/mocha.js"></script>
+    <script src="/node_modules/chai/chai.js"></script>
+    <script type="text/javascript">
+      mocha.setup({
+        ui: 'bdd'
+      });
+    </script>
+    <script src="/dist/client/test/notate.js"></script>
+    <script type="text/javascript">
+      var expect = window.chai.expect;
+      var Notate = window.default; // TODO: this is ugly!
+
+      describe('Notate production!', function() {
+        it('is accessible', function() {
+          expect(Notate).to.exist;
+        });
+
+        it('annotates an error', function annotates() {
+          var err = new Error('fake error');
+          var notate = new Notate();
+          notate.add(err);
+          expect(err.stack).to.contain('**breadcrumb: Context.annotates');
+        });
+      });
+
+      mocha.run();
+    </script>
+  </body>
+</html>
