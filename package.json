@@ -9,18 +9,20 @@
     "lint": "time eslint .",
 
     "pre-commit": "npm run clean && npm run lint && npm run build-client && npm run test",
-    "pre-publish": "npm run pre-commit && npm run clean && npm run build && npm run build-client-production && rm -rf dist/client/test",
+    "pre-publish": "npm run pre-commit && npm run clean && npm run build-server && npm run build-client-production && rm -rf dist/client/test",
 
     "test": "npm run test-client-cli-all && npm run test-server-all",
 
-    "build": "babel src --out-dir dist/server",
+    "serve": "python -m SimpleHTTPServer",
+    "ngrok": "~/Development/tools/ngrok/ngrok http -subdomain=gammacorvi 8000",
+
+    "build-server": "babel src --out-dir dist/server",
 
     "build-client": "time webpack",
     "build-client-coverage": "npm run build-client -- --config webpack.config.coverage.js",
     "build-client-production": "npm run build-client -- --config webpack.config.production.js",
     "watch-client": "npm run build-client -- --watch",
     "watch-client-coverage": "npm run build-client -- --watch --config webpack.config.coverage.js",
-    "serve": "python -m SimpleHTTPServer",
 
     "test-client": "time mocha-phantomjs",
     "test-client-coverage": "time mocha-phantomjs --hooks ./test/extract_coverage_hook.js",
@@ -78,10 +80,12 @@
     "eslint-plugin-thehelp": "0.1.0",
     "isparta": "4.0.0",
     "istanbul": "0.4.2",
+    "lodash": "4.9.0",
     "mocha": "2.3.4",
     "mocha-phantomjs": "4.0.2",
     "phantomjs-prebuilt": "2.1.5",
     "sinon": "1.17.3",
+    "superagent": "1.8.3",
     "webpack": "1.12.14"
   },
 
