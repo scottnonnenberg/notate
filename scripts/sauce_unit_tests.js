@@ -231,6 +231,9 @@ setTimeout(function() {
   });
 }, 500);
 
+// TODO: cancel outstanding jobs here? starting a full takes a long time!
+//   https://github.com/axemclion/grunt-saucelabs/blob/master/src/Job.js#L181
+
 process.on('SIGTERM', function() {
   console.log('sauce-unit-tests: got SIGTERM!');
   shutdown();
