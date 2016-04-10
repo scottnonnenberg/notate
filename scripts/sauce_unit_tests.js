@@ -101,11 +101,12 @@ function startNGrok() {
 }
 
 function startRun(options, cb) {
-  const {username, key, url, platforms} = options;
+  const {username, key, url, platforms, timeout} = options;
   const target = `https://saucelabs.com/rest/v1/${username}/js-tests`;
   const payload = {
-    platforms: platforms,
-    url: url,
+    platforms,
+    url,
+    timeout,
     framework: 'mocha'
   };
 
@@ -126,7 +127,7 @@ function startRun(options, cb) {
 }
 
 function pollForCompletion(tests, options, cb) {
-  const {username, key, timeout: pollTimeout} = options;
+  const {username, key, pollTimeout} = options;
   const target = `https://saucelabs.com/rest/v1/${username}/js-tests/status`;
   const payload = {
     'js tests': tests
@@ -134,23 +135,30 @@ function pollForCompletion(tests, options, cb) {
 
   console.log('starting poll!');
 
+  var next = function () {
+    setTimeout(function() {
+      pollForCompletion(tests, options, cb);
+    }, pollTimeout);
+  };
+
   superagent
     .post(target)
     .send(payload)
     .auth(username, key)
     .end(function(err, res) {
       if (err) {
-        return cb(err);
+        console.log('Error pulling completion status: ' + err.stack);
+        return next();
       }
 
       const result = res.body;
 
+      console.log(res.body);
+
       // TODO: print out progress report - number of jobs done so far!
 
       if (!result.completed) {
-        return setTimeout(function() {
-          pollForCompletion(tests, options, cb);
-        }, pollTimeout);
+        return next();
       }
 
       return cb(null, res.body['js tests']);
@@ -185,7 +193,8 @@ const options = {
   key,
   url,
   platforms,
-  pollTimeout: 3000
+  timeout: 20 * 1000,
+  pollTimeout: 10 * 1000
 };
 
 // ---
