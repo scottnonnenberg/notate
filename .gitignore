@@ -3,7 +3,7 @@
 node_modules
 dist
 coverage
-assets
+doc
 
 npm-debug.log
 *.sublime-workspace

@@ -10,7 +10,7 @@
         "coverage",
 
         "dist",
-        "docs",
+        "doc",
         "bower_components"
       ],
       "file_exclude_patterns": [
