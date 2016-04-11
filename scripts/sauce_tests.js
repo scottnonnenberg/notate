@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { startProcess } from './util';
+import { startProcess, waitForCompletion } from './util';
 import superagent from 'superagent';
 import _ from 'lodash';
 
@@ -198,12 +198,11 @@ function shutdown(err) {
     console.error(err.stack);
   }
 
-  server.kill();
-  ngrok.kill();
-
-  setTimeout(function() {
-    process.exit(testReturnCode);
-  }, 2000);
+  waitForCompletion(server, function() {
+    waitForCompletion(ngrok, function() {
+      process.exit(testReturnCode);
+    });
+  });
 }
 
 const options = {

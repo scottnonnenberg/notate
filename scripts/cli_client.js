@@ -1,8 +1,8 @@
-import { startProcess } from './util';
+import { startProcess, waitForCompletion } from './util';
 
 
 function startServer() {
-  const server = startProcess('npm', ['run', 'serve']);
+  const server = startProcess('npm', ['run', 'serve', '--', '8001']);
 
   server.on('close', function(code) {
     console.log(`cli-client: server exited with code ${code}`);
@@ -27,12 +27,11 @@ function shutdown(err) {
     console.error(err.stack);
   }
 
-  server.kill();
-  tests.kill();
-
-  setTimeout(function() {
-    process.exit(testReturnCode);
-  }, 2000);
+  waitForCompletion(server, function() {
+    waitForCompletion(tests, function() {
+      process.exit(testReturnCode);
+    });
+  });
 }
 
 

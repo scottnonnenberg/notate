@@ -15,5 +15,21 @@ export function startProcess(command, args) {
     process.stderr.write(data.toString());
   });
 
+  child.on('close', function() {
+    child.closed = true;
+  });
+
   return child;
+}
+
+export function waitForCompletion(child, cb) {
+  if (child.closed) {
+    return cb();
+  }
+
+  child.kill();
+
+  child.on('close', function() {
+    return cb();
+  });
 }
