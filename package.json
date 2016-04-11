@@ -9,12 +9,12 @@
     "lint": "time eslint .",
 
     "pre-commit": "npm run clean && npm run lint && npm run build-client && npm run test",
-    "pre-publish": "npm run pre-commit && npm run clean && npm run build-server && npm run build-client-production && rm -rf dist/client/test",
+    "pre-publish": "npm run pre-commit && npm run clean && npm run build-server && npm run build-client-production",
 
     "test": "npm run test-client-cli-all && npm run test-server-all",
 
     "serve": "python -m SimpleHTTPServer",
-    "ngrok": "~/Development/tools/ngrok/ngrok http -subdomain=gammacorvi 8000",
+    "ngrok": "~/Development/tools/ngrok/ngrok http -subdomain=gammacorvi",
 
     "build-server": "babel src --out-dir dist/server",
 

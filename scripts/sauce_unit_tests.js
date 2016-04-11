@@ -81,7 +81,7 @@ const platforms = [
 // ---
 
 function startServer() {
-  const server = startProcess('npm', ['run', 'serve']);
+  const server = startProcess('npm', ['run', 'serve', '--', '8001']);
 
   server.on('close', function(code) {
     console.log(`sauce-unit-tests: server exited with code ${code}`);
@@ -91,7 +91,7 @@ function startServer() {
 }
 
 function startNGrok() {
-  const server = startProcess('npm', ['run', 'ngrok']);
+  const server = startProcess('npm', ['run', 'ngrok', '--', '8001']);
 
   server.on('close', function(code) {
     console.log(`sauce-unit-tests: ngrok exited with code ${code}`);
@@ -168,15 +168,15 @@ function pollForCompletion(tests, options, cb) {
 function processResults(results) {
   console.log(results);
 
-  const success = _.some(results, function(item) {
+  const failure = _.some(results, function(item) {
     return item.result.failures > 0;
   });
 
-  if (success) {
+  if (!failure) {
     console.log('All tests succeeded!');
   }
 
-  return success ? 1 : 0;
+  return failure ? 1 : 0;
 }
 
 
