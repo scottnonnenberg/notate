@@ -3,11 +3,19 @@ coverage
 scripts
 src
 assets
+doc
 
+.babelrc
 .gitignore
 .npmignore
 .eslintignore
 .eslintrc.js
 .istanbul.yml
+favicon.ico
+webpack*.js
+
+platforms.json
 
 *.sublime-*
+
+dist/client/test
