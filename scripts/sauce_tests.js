@@ -91,11 +91,13 @@ function pollForTestCompletion(jobs, options, cb) {
 
 function isFailure(result) {
   const testResult = result.result || {};
+
   const failure = _.isString(testResult) || testResult.stackTrace || testResult.failures;
   if (failure) {
     return true;
   }
 
+  // if the page never reports results, we might get zeros across the board
   return testResult.tests === 0;
 }
 
