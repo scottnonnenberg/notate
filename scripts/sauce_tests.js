@@ -3,113 +3,39 @@ import fs from 'fs';
 import { startProcess, waitForCompletion } from './util';
 import superagent from 'superagent';
 import _ from 'lodash';
-
-// Platforms, in priority order:
-//   Chrome
-//   Firefox
-//   IE 11
-//   Mobile Safari
-//   Chrome for Android
-//   Safari
-//   Edge
-
-const username = 'scottnonnenberg';
-const key = '3ad04f60-6543-4b06-aede-03c6c5046ea1';
-const url = 'https://gammacorvi.ngrok.io/test/all.html';
-
-// Total: 71.47%
-//   (from mobile table in spreadsheet)
-//   Note: Doesn't capture various OSes very well
-//   Also completely blind to issues specific to older browsers and OSes
-const platforms = [
-  // Chrome
-  ['Windows 10', 'chrome', '49'], // 14.17%
-  ['Windows 10', 'chrome', '48'], // 13.03%
-
-  // Android - chrome: 14.92%, general: 4.49%
-  ['Linux', 'android', '5.1'],
-  ['Linux', 'android', '4.4'],
-
-  // Mobile Safari - ipad: 3.13%, iphone: 7.02%
-  ['Mac 10.10', 'iphone', '9.2'],
-  ['Mac 10.10', 'iphone', '8.4'],
-
-  // Firefox
-  ['Windows 10', 'firefox', '45'], // 2.55%
-  ['Windows 10', 'firefox', '44'], // 3.74%
-
-  // IE 11 - 5.58%
-  ['Windows 10', 'internet explorer', '11'],
-
-  // Safari
-  ['Mac 10.11', 'safari', '9'], // 1.56%
-  ['Mac 10.10', 'safari', '8'], // 0.29%
-
-  // Edge
-  ['Windows 10', 'microsoftedge', '13'] // 0.99%
-];
-
-// function getPlatforms(options, cb) {
-//   const {username, key} = options;
-//   const target = 'https://saucelabs.com/rest/v1/info/platforms/webdriver';
-
-//   superagent
-//     .get(target)
-//     .auth(username, key)
-//     .end(function(err, res) {
-//       if (err) {
-//         return cb(err);
-//       }
-
-//       return cb(null, res.body);
-//     });
-// }
-
-// function displayPlatforms(platforms) {
-//   // eliminate any weird dev/beta versions
-//   platforms = _.reject(platforms, platform => isNaN(platform.short_version = parseFloat(platform.short_version)));
+import config from 'config';
 
 
-//   platforms = _.orderBy(platforms, ['api_name', 'short_version', 'os'], ['asc', 'desc', 'asc']);
-
-//   platforms = _.map(platforms, function(platform) {
-//     return `['${platform.os}', '${platform.api_name}', '${platform.short_version}']` +
-//       ` (${platform.long_name}, ${platform.long_version})`;
-//   });
-
-//   console.log(platforms.join('\n'));
-// }
-
-// ---
-
-function startServer() {
-  const server = startProcess('npm', ['run', 'serve', '--', '8001']);
+function startServer(options) {
+  const { command, args } = options;
+  const server = startProcess(command, args);
 
   server.on('close', function(code) {
-    console.log(`sauce-unit-tests: server exited with code ${code}`);
+    console.log(`sauce-tests: server exited with code ${code}`);
   });
 
   return server;
 }
 
-function startNGrok() {
-  const server = startProcess('npm', ['run', 'ngrok', '--', '8001']);
+function startTunnel(options) {
+  const { command, args } = options;
+  const tunnel = startProcess(command, args);
 
-  server.on('close', function(code) {
-    console.log(`sauce-unit-tests: ngrok exited with code ${code}`);
+  tunnel.on('close', function(code) {
+    console.log(`sauce-tests: tunnel exited with code ${code}`);
   });
 
-  return server;
+  return tunnel;
 }
 
-function startRun(options, cb) {
-  const {username, key, url, platforms, timeout} = options;
+function startTests(options, cb) {
+  const {username, key, url, platforms, timeout, framework} = options;
   const target = `https://saucelabs.com/rest/v1/${username}/js-tests`;
   const payload = {
     platforms,
     url,
     timeout,
-    framework: 'mocha'
+    framework
   };
 
   superagent
@@ -128,16 +54,16 @@ function startRun(options, cb) {
     });
 }
 
-function pollForCompletion(tests, options, cb) {
+function pollForTestCompletion(jobs, options, cb) {
   const {username, key, pollTimeout} = options;
   const target = `https://saucelabs.com/rest/v1/${username}/js-tests/status`;
   const payload = {
-    'js tests': tests
+    'js tests': jobs
   };
 
   var next = function () {
     setTimeout(function() {
-      pollForCompletion(tests, options, cb);
+      pollForTestCompletion(jobs, options, cb);
     }, pollTimeout);
   };
 
@@ -163,12 +89,21 @@ function pollForCompletion(tests, options, cb) {
     });
 }
 
-function processProgress(jobs) {
-  const summary = _.countBy(jobs, function(job) {
-    job = job || {};
-    const result = job.result || {};
+function isFailure(result) {
+  const testResult = result.result || {};
+  const failure = _.isString(testResult) || testResult.stackTrace || testResult.failures;
+  if (failure) {
+    return true;
+  }
 
-    return job.status || (result.failures ? 'failed' : 'succeeded');
+  return testResult.tests === 0;
+}
+
+function processProgress(results) {
+
+  const summary = _.countBy(results, function(result) {
+    result = result || {};
+    return result.status || (isFailure(result) ? 'failed' : 'succeeded');
   });
 
   console.log(summary);
@@ -177,9 +112,7 @@ function processProgress(jobs) {
 function processResults(results) {
   fs.writeFileSync('sauce_results.json', JSON.stringify(results, null, '  '));
 
-  const failures = _.filter(results, function(item) {
-    return item.result.failures > 0;
-  });
+  const failures = _.filter(results, isFailure);
 
   if (failures.length) {
     console.log('Failures:');
@@ -199,49 +132,25 @@ function shutdown(err) {
   }
 
   waitForCompletion(server, function() {
-    waitForCompletion(ngrok, function() {
+    waitForCompletion(tunnel, function() {
       process.exit(testReturnCode);
     });
   });
 }
 
-const options = {
-  username,
-  key,
-  url,
-  platforms,
-  timeout: 20 * 1000,
-  pollTimeout: 10 * 1000
-};
 
-// ---
-
-// const rawPlatforms = require('../platforms.json');
-// displayPlatforms(rawPlatforms);
-
-// ---
-
-// getPlatforms(options, function(err, platforms) {
-//   if (err) {
-//     throw err;
-//   }
-
-//   displayPlatforms(platforms);
-// });
-
-// ---
-
-const server = startServer();
-const ngrok = startNGrok();
+const options = config.get('sauce');
+const server = startServer(options.serverOptions);
+const tunnel = startTunnel(options.tunnelOptions);
 let testReturnCode = 1;
 
 setTimeout(function() {
-  startRun(options, function(err, tests) {
+  startTests(options, function(err, jobs) {
     if (err) {
       return shutdown(err);
     }
 
-    pollForCompletion(tests, options, function(err, result) {
+    pollForTestCompletion(jobs, options, function(err, result) {
       if (err) {
         return shutdown(err);
       }
@@ -253,16 +162,16 @@ setTimeout(function() {
   });
 }, 500);
 
-// TODO: cancel outstanding jobs here? starting a full takes a long time!
+// TODO: cancel outstanding jobs on cancel? starting a full run takes a long time!
 //   https://github.com/axemclion/grunt-saucelabs/blob/master/src/Job.js#L181
 
 process.on('SIGTERM', function() {
-  console.log('sauce-unit-tests: got SIGTERM!');
+  console.log('sauce-tests: got SIGTERM!');
   shutdown();
 });
 
 process.on('SIGINT', function() {
-  console.log('sauce-unit-tests: got SIGINT!');
+  console.log('sauce-tests: got SIGINT!');
   shutdown();
 });
 
@@ -271,5 +180,5 @@ process.on('uncaughtException', function(err) {
 });
 
 process.on('exit', function() {
-  console.log('sauce-unit-tests: shutting down');
+  console.log('sauce-tests: shutting down');
 });

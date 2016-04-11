@@ -4,7 +4,9 @@ node_modules
 dist
 coverage
 doc
+config/local*
 
 sauce_results.json
+
 npm-debug.log
 *.sublime-workspace
