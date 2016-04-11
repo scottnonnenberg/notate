@@ -98,7 +98,8 @@ function isFailure(result) {
   }
 
   // if the page never reports results, we might get zeros across the board
-  return testResult.tests === 0;
+  // also allows for a totally empty object
+  return !testResult.tests;
 }
 
 function processProgress(results) {
