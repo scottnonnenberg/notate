@@ -34,13 +34,13 @@ describe('integration/notate', function() {
 
       if (typeof console === 'undefined' || console || console.log) {
         console.log('plain error.stack:');
-        console.log(error.stack);
+        console.log(error.alternateStack || error.stack);
       }
 
       annotateError(error);
       if (typeof console === 'undefined' || console || console.log) {
         console.log('annotated error.stack:');
-        console.log(error.stack);
+        console.log(error.alternateStack || error.stack);
       }
 
       const pretty = notate.prettyPrint(error);
@@ -76,9 +76,10 @@ describe('integration/notate', function() {
 
       notate.default(err, null, {left: 1, right: 2});
 
-      expect(err).to.have.property('stack').that.contains('addCurrent');
+      const stack = err.alternateStack || err.stack;
+      expect(stack).to.contain('addCurrent');
 
-      const lines = err.stack.split('\n');
+      const lines = stack.split('\n');
       const firstLine = (lines[0] === 'Error: something') ? 1 : 0;
       expect(lines[firstLine]).to.contain('**breadcrumb:');
       expect(lines[firstLine]).to.contain('addCurrent');
@@ -101,10 +102,11 @@ describe('integration/notate', function() {
 
       notate.default(err, null, {left: 1, right: 2});
 
-      expect(err).to.have.property('stack').that.contains('addCurrent');
+      const stack = err.alternateStack || err.stack;
+      expect(stack).to.contain('addCurrent');
 
-      const lines = err.stack.split('\n');
-      const firstLine = (lines[0] === 'Error') ? 1 : 0;
+      const lines = stack.split('\n');
+      const firstLine = (lines[0] === 'Error' || lines[0] === 'Error: ') ? 1 : 0;
       expect(lines[firstLine]).to.contain('**breadcrumb:');
       expect(lines[firstLine]).to.contain('addCurrent');
       expect(lines[firstLine + 1]).not.to.contain('**breadcrumb:');
@@ -135,9 +137,11 @@ describe('integration/notate', function() {
       first(err);
       second(err);
 
-      expect(err.stack).to.contain('twice');
-      expect(err.stack).to.contain('first');
-      expect(err.stack).to.contain('second');
+      const stack = err.alternateStack || err.stack;
+
+      expect(stack).to.contain('twice');
+      expect(stack).to.contain('first');
+      expect(stack).to.contain('second');
     });
 
     it('merges keys into error', function() {

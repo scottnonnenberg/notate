@@ -159,9 +159,9 @@ export function _insert(err, line) {
   }
 
   const v8 = /\n +at /;
-  let stack = err.stack || '';
-
-  let indentation = _getIndentation(stack);
+  // we use alternateStack when we can't update stack (PhantomJS)
+  let stack = err.alternateStack || err.stack || '';
+  const indentation = _getIndentation(stack);
 
   if (_startsWithError(stack)) {
     const lines = stack.split(v8);
@@ -174,27 +174,38 @@ export function _insert(err, line) {
   }
 
   try {
-    if (Object.defineProperty) {
+    const descriptor = Object.getOwnPropertyDescriptor(err, 'stack');
+    if (!descriptor || descriptor.enumerable && descriptor.configurable) {
+      // On Android 4.4, TypeError objects have an enumerable/configurable stack prop
       Object.defineProperty(err, 'stack', {
         value: stack,
+        configurable: true,
         enumerable: false,
-        configurable: true
+        writable: true
       });
     }
-    else {
+    else if (descriptor.writable) {
       err.stack = stack;
+    }
+    else {
+      Object.defineProperty(err, 'alternateStack', {
+        value: stack,
+        configurable: true,
+        enumerable: false,
+        writable: true
+      });
     }
   }
   catch (err) {
     if (typeof console === 'undefined' || console || console.error) {
-      console.error('Error: Cannot add line to error -- ' + err.message);
+      console.error('Error: Cannot add line to stack -- ' + err.message);
     }
   }
 }
 
 export function _prepareStack(err) {
   err = err || {};
-  let stack = err.stack || '';
+  let stack = err.alternateStack || err.stack || '';
   const cwd = process.cwd();
 
   if (cwd !== '/') {

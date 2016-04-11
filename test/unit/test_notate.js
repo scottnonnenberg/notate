@@ -225,14 +225,38 @@ describe('unit/notate', function() {
       expect(lines).to.have.property('1', '  at randomString');
     });
 
-    it('does not throw if err.stack is already a non-writeable property', function() {
+    it('sets alternateStack if err.stack is not writeable', function() {
       const err = Object.create(null);
       Object.defineProperty(err, 'stack', {
         writable: false,
         value: 'something'
       });
 
-      notate._insert(err);
+      const line = 'inserted line';
+
+      notate._insert(err, line);
+
+      expect(err).to.have.property('alternateStack').that.contains(line);
+      expect(err).to.have.property('stack').not.that.contains(line);
+    });
+
+    it('fixes stack property if it is enumerable/configurable', function() {
+      const err = Object.create(null);
+      Object.defineProperty(err, 'stack', {
+        writable: true,
+        enumerable: true,
+        configurable: true,
+        value: 'something'
+      });
+      const expected = 'inserted line\nsomething';
+      const line = 'inserted line';
+
+      notate._insert(err, line);
+
+      expect(err).to.have.property('stack', expected);
+
+      const descriptor = Object.getOwnPropertyDescriptor(err, 'stack');
+      expect(descriptor).to.have.property('enumerable', false);
     });
 
     it('handles no err', function() {
@@ -274,6 +298,19 @@ describe('unit/notate', function() {
 
       const actual = notate._prepareStack(err);
       expect(actual).to.equal(err.stack);
+    });
+
+    it('prefers alternateStack if it exists on object', function() {
+      const err = {
+        alternateStack:
+          '  **breadcrumb: blah',
+        stack:
+          '  at second line\n' +
+          '  at third line'
+      };
+
+      const actual = notate._prepareStack(err);
+      expect(actual).to.equal(err.alternateStack);
     });
 
     if (process.cwd() !== '/') {
