@@ -13,21 +13,31 @@
         ui: 'bdd'
       });
     </script>
-    <script src="/dist/client/test/notate.js"></script>
+    <script src="/dist/client/notate.js"></script>
     <script src="/test/setup/sauce_reporter.js"></script>
     <script type="text/javascript">
       var expect = window.chai.expect;
-      var Notate = window.default; // TODO: this is ugly!
+      var notate = window.default; // TODO: this is ugly!
 
       describe('Notate production!', function() {
         it('is accessible', function() {
-          expect(Notate).to.exist;
+          expect(notate).to.exist;
         });
 
         it('annotates an error', function annotates() {
           var err = new Error('fake error');
-          var notate = new Notate();
-          notate.add(err);
+
+          // fuck internet explorer
+          if (!err.stack) {
+            try {
+              throw err;
+            }
+            catch (e) {
+              err = e;
+            }
+          }
+
+          notate(err);
           expect(err.stack).to.contain('**breadcrumb: Context.annotates');
         });
       });

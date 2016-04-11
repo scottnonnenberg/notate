@@ -1,140 +1,190 @@
-'use strict';
+import { expect } from 'chai';
 
-var sinon = require('sinon');
-var chai = require('chai');
-var expect = chai.expect;
-
-var Notate = require('src/notate.js');
+import * as notate from 'src/notate.js';
 
 
 describe('unit/notate', function() {
-  var notate;
-
-  beforeEach(function() {
-    notate = new Notate();
-  });
-
   // Public API
   // ========
 
-  if (typeof console === 'undefined' || typeof console.log === 'undefined') {
-    window.console = {
-      log: function() {}
-    };
-  }
-
-  describe('#toString', function() {
-    var err;
+  describe('#prettyPrint', function() {
+    let err;
 
     beforeEach(function() {
       err = new Error('this is the message');
       err.one = 1;
       err.two = 'two';
-      err.stack = 'overridden stack';
-    });
 
-    it('returns empty string if err is null', function() {
-      var actual = notate.toString();
-
-      expect(actual).to.equal('');
-    });
-
-    it('handles a non-vanilla error', function() {
-      var err = new TypeError('something');
-      notate.add(err);
-      var actual = notate.toString(err);
-      console.log(actual);
-
-      var r = /TypeError/g;
-      var match = actual.match(r);
-      if (!match) {
-        return;
-      }
-      expect(match).to.have.property('length').that.is.below(2);
+      Object.defineProperty(err, 'stack', {
+        value: 'overridden stack',
+        enumerable: false
+      });
     });
 
     it('includes callstack when log is not set', function() {
-      var actual = notate.toString(err);
+      const actual = notate.prettyPrint(err);
 
-      expect(actual).to.match(/overridden stack/);
+      expect(actual).to.contain(err.stack);
     });
 
     it('include callstack if log is "error"', function() {
       err.log = 'error';
 
-      var actual = notate.toString(err);
+      const actual = notate.prettyPrint(err);
 
-      expect(actual).to.match(/overridden stack/);
+      expect(actual).to.contain(err.stack);
     });
 
     it('include callstack if log is "warn"', function() {
       err.log = 'warn';
 
-      var actual = notate.toString(err);
+      const actual = notate.prettyPrint(err);
 
-      expect(actual).to.match(/overridden stack/);
+      expect(actual).to.contain(err.stack);
     });
 
     it('does not include callstack if log is "info"', function() {
       err.log = 'info';
 
-      var actual = notate.toString(err);
+      const actual = notate.prettyPrint(err);
 
-      expect(actual).not.to.match(/overridden stack/);
+      expect(actual).not.to.contain(err.stack);
+    });
+
+    it('returns empty string if err is null', function() {
+      const actual = notate.prettyPrint();
+
+      expect(actual).to.equal('');
+    });
+
+    it('handles an annotated non-vanilla error', function() {
+      const err = new TypeError('something');
+      notate.default(err);
+      const actual = notate.prettyPrint(err);
+
+      const r = /TypeError/g;
+      const match = actual.match(r);
+      if (!match) {
+        return;
+      }
+      expect(match).to.have.property('length').that.is.below(2);
     });
   });
 
-  // Helper functions
+  // Internals
   // ========
 
   describe('#_insert', function() {
-    var toInsert;
+    it('puts current file into stack', function() {
+      const err = {
+        stack: 'Error: something\n' +
+          '    at line 1\n' +
+          '    at line 2'
+      };
+      const item = 'randomString';
 
-    beforeEach(function() {
-      toInsert = 'randomString';
-      notate._get = sinon.stub().returns(toInsert);
+      notate._insert(err, item);
+
+      expect(err).to.have.property('stack').that.contains(item);
+
+      const lines = err.stack.split('\n');
+      expect(lines).to.have.property('1', '    at randomString');
     });
 
-    it('puts current file into stack', function() {
-      var err = {
+    it('matches current indentation', function() {
+      const err = {
         stack: 'Error: something\n' +
           '  at line 1\n' +
-          '  at line 2\n'
+          '  at line 2'
       };
-      notate._insert(err);
+      const item = 'randomString';
 
-      expect(err).to.have.property('stack').that.match(/randomString/);
-      var lines = err.stack.split('\n');
+      notate._insert(err, item);
+
+      expect(err).to.have.property('stack').that.contains(item);
+
+      const lines = err.stack.split('\n');
       expect(lines).to.have.property('1', '  at randomString');
     });
 
-    it('does just fine with an err with no " at " lines', function() {
-      var err = {
+    it('handles err with no " at " lines', function() {
+      const err = {
         stack: 'some random text'
       };
-      notate._insert(err);
+      const item = 'randomString';
 
-      expect(err).to.have.property('stack').that.match(/randomString/);
-      var lines = err.stack.split('\n');
+      notate._insert(err, item);
+
+      expect(err).to.have.property('stack').that.contains(item);
+
+      const lines = err.stack.split('\n');
       expect(lines).to.have.property('0', 'randomString');
     });
 
+    it('handles firefox-style callstack', function() {
+      const err = {
+        stack:
+          'makeError@http://localhost:8000/dist/client/test/all.js:9408:17\n' +
+          '@http://localhost:8000/dist/client/test/all.js:9415:20\n' +
+          'callFn@http://localhost:8000/node_modules/mocha/mocha.js:4202:18\n' +
+          '[35]</</Runnable.prototype.run@http://localhost:8000/node_modules/mocha/mocha.js:4195:7\n' +
+          '[36]</</Runner.prototype.runTest@http://localhost:8000/node_modules/mocha/mocha.js:4661:5\n' +
+          'next/<@http://localhost:8000/node_modules/mocha/mocha.js:4768:7\n' +
+          'next@http://localhost:8000/node_modules/mocha/mocha.js:4581:1\n' +
+          'next/<@http://localhost:8000/node_modules/mocha/mocha.js:4591:7\n' +
+          'next@http://localhost:8000/node_modules/mocha/mocha.js:4523:1\n' +
+          '[36]</</Runner.prototype.hook/<@http://localhost:8000/node_modules/mocha/mocha.js:4559:5\n' +
+          'timeslice@http://localhost:8000/node_modules/mocha/mocha.js:12326:5'
+      };
+      const item = 'randomString';
+
+      notate._insert(err, item);
+
+      const lines = err.stack.split('\n');
+      expect(lines).to.have.property(0, item);
+    });
+
+    it('handles Chrome-style callstack', function() {
+      const err = {
+        stack:
+          'Error: user attempted something!\n' +
+          '    at makeError (test_notate.js:14)\n' +
+          '    at Context.<anonymous> (test_notate.js:21)\n' +
+          '    at callFn (mocha.js:4202)\n' +
+          '    at Test.Runnable.run (mocha.js:4195)\n' +
+          '    at Runner.runTest (mocha.js:4661)\n' +
+          '    at mocha.js:4768\n' +
+          '    at next (mocha.js:4581)\n' +
+          '    at mocha.js:4591\n' +
+          '    at next (mocha.js:4523)\n' +
+          '    at mocha.js:4559'
+      };
+      const item = 'randomString';
+
+      notate._insert(err, item);
+
+      const lines = err.stack.split('\n');
+      expect(lines).to.have.property('1', '    at ' + item);
+    });
+
     it('does alright with error with \'at\' in message', function() {
-      var err = {
+      const err = {
         stack: 'Error: at or near ";"\n' +
           '  at line 1\n' +
           '  at line 2'
       };
-      notate._insert(err);
+      const item = 'randomString';
 
-      console.log(err.stack);
-      expect(err).to.have.property('stack').that.match(/randomString/);
-      var lines = err.stack.split('\n');
+      notate._insert(err, item);
+
+      expect(err).to.have.property('stack').that.contains('randomString');
+
+      const lines = err.stack.split('\n');
       expect(lines).to.have.property('1', '  at randomString');
     });
 
-    it('does not throw if err.stack is not writeable', function() {
-      var err = Object.create(null);
+    it('does not throw if err.stack is already a non-writeable property', function() {
+      const err = Object.create(null);
       Object.defineProperty(err, 'stack', {
         writable: false,
         value: 'something'
@@ -143,44 +193,105 @@ describe('unit/notate', function() {
       notate._insert(err);
     });
 
-    it('does just fine with no err', function() {
+    it('handles no err', function() {
       notate._insert();
+    });
+
+    it('handles no stack', function() {
+      const err = {
+        stack: null
+      };
+
+      notate._insert(err, 'line');
+
+      expect(err.stack).to.equal('line');
     });
   });
 
   describe('#_prepareStack', function() {
     it('removes everything up to first at "Error:"', function() {
-      var err = {
+      const err = {
         stack: 'Error: error message\nsecond part of error\nthird part of error\n' +
           '  at second line\n' +
           '  at third line'
       };
-      var expected = '  at second line\n' +
-          '  at third line';
+      const expected =
+        '  at second line\n' +
+        '  at third line';
 
-      var actual = notate._prepareStack(err);
+      const actual = notate._prepareStack(err);
       expect(actual).to.equal(expected);
     });
 
     it('doesn\'t remove first line if no "Error"', function() {
-      var err = {
-        stack: '  at second line\n' +
+      const err = {
+        stack:
+          '  at second line\n' +
           '  at third line'
       };
 
-      var actual = notate._prepareStack(err);
+      const actual = notate._prepareStack(err);
       expect(actual).to.equal(err.stack);
     });
 
-    if (typeof process !== 'undefined') {
+    if (process.cwd() !== '/') {
       it('removes process.cwd()', function() {
-        var err = {
-          stack: process.cwd() + '  ' + process.cwd() + '  ' + process.cwd()
+        const err = {
+          stack: process.cwd() + 'line1' + process.cwd() + 'line2' + process.cwd()
         };
 
-        var actual = notate._prepareStack(err);
-        expect(actual).to.equal('    ');
+        const actual = notate._prepareStack(err);
+        expect(actual).to.equal('line1line2');
       });
     }
+  });
+
+  describe('#_getFirstLine', function() {
+    it('removes " at " at start of breadcrumb', function() {
+      const lines = ['   at blah'];
+      const actual = notate._getFirstLine(lines);
+
+      expect(actual).to.equal('**breadcrumb: blah');
+    });
+
+    it('handles a no "at" breadcrumb', function() {
+      const lines = ['blah'];
+      const actual = notate._getFirstLine(lines);
+
+      expect(actual).to.equal('**breadcrumb: blah');
+    });
+
+    it('empty returned if no stacktrace', function() {
+      const lines = [];
+      const actual = notate._getFirstLine(lines);
+
+      expect(actual).to.equal('**breadcrumb: <empty>');
+    });
+  });
+
+  describe('#_getIndentation', function() {
+    it('handles no indentation', function() {
+      expect(notate._getIndentation('blah')).to.equal('');
+    });
+
+    it('handles four-space indentation', function() {
+      expect(notate._getIndentation('    blah')).to.equal('    ');
+    });
+
+    it('handles two-space indentation', function() {
+      expect(notate._getIndentation('  blah')).to.equal('  ');
+    });
+
+    it('multiline input', function() {
+      expect(notate._getIndentation('Error: something\n  at blah')).to.equal('  ');
+    });
+
+    it('returns empty string for null input', function() {
+      expect(notate._getIndentation()).to.equal('');
+    });
+
+    it('returns empty string for non-string', function() {
+      expect(notate._getIndentation(3)).to.equal('');
+    });
   });
 });

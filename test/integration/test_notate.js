@@ -1,137 +1,189 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import Notate from 'src/notate';
+import * as notate from 'src/notate';
 
 
 describe('integration/notate', function() {
-  var notate;
-
-  beforeEach(function() {
-    notate = new Notate();
-  });
-
   // Public API
-  // ========
+  // =======
 
-  if (typeof console === 'undefined' || typeof console.log === 'undefined') {
-    window.console = {
-      log: function() {}
-    };
-  }
+  describe('complete scenario', function() {
+    it('works', function() {
+      const makeError = function() {
+        let error = new Error('user attempted something!');
 
-  describe('#newError', function() {
-    it('is well-formed', function wellFormed() {
-      var err = notate.newError('random', {x: 1, y: 2});
-      console.log(err.stack);
+        // fuck internet explorer
+        if (!error.stack) {
+          try {
+            throw error;
+          }
+          catch (e) {
+            error = e;
+          }
+        }
 
-      var message = err.message || err.description;
-      expect(message).to.equal('random');
+        return error;
+      };
 
-      expect(err).to.have.property('x', 1);
-      expect(err).to.have.property('y', 2);
+      const annotateError = function(err) {
+        notate.default(err, null, {user: 'username'});
+      };
 
-      var stack = err.stack;
-      expect(stack).to.exist;
-      expect(stack).to.match(/wellFormed/);
+      const error = makeError();
 
-      var lines = stack.split('\n');
-      if (lines[0] === 'Error: random') {
-        expect(lines[1]).to.match(/wellFormed/);
+      if (typeof console === 'undefined' || console || console.log) {
+        console.log('plain error.stack:');
+        console.log(error.stack);
       }
-      else {
-        expect(lines[0]).to.match(/wellFormed/);
+
+      annotateError(error);
+      if (typeof console === 'undefined' || console || console.log) {
+        console.log('annotated error.stack:');
+        console.log(error.stack);
       }
+
+      const pretty = notate.prettyPrint(error);
+      if (typeof console === 'undefined' || console || console.log) {
+        console.log('pretty error:');
+        console.log(pretty);
+      }
+
+      const lines = pretty.split('\n');
+      expect(lines).to.have.length.above(10);
+
+      expect(pretty).to.include('makeError');
+      expect(pretty).to.include('annotateError');
+      expect(pretty).to.include('username');
+      expect(pretty).to.include('user attempted something');
+      expect(pretty).to.include('truncated');
     });
   });
 
-  describe('#add', function() {
+  describe('#notate (default)', function() {
     it('adds current file into error\'s stack', function addCurrent() {
-      var err = notate.newError('something');
-      notate.add(err, null, {left: 1, right: 2});
+      let err = new Error('something');
 
-      console.log(err.stack);
-      expect(err).to.have.property('stack').that.match(/addCurrent/);
-
-      var lines = err.stack.split('\n');
-
-      if (lines[0] === 'Error: something') {
-        expect(lines[1]).to.match(/\*\*breadcrumb:/);
-        expect(lines[1]).to.match(/addCurrent/);
-        expect(lines[2]).not.to.match(/\*\*breadcrumb:/);
-        expect(lines[2]).to.match(/addCurrent/);
+      // fuck internet explorer
+      if (!err.stack) {
+        try {
+          throw err;
+        }
+        catch (e) {
+          err = e;
+        }
       }
-      else {
-        expect(lines[0]).to.match(/\*\*breadcrumb:/);
-        expect(lines[0]).to.match(/addCurrent/);
-        expect(lines[1]).not.to.match(/\*\*breadcrumb:/);
-        expect(lines[1]).to.match(/addCurrent/);
+
+      notate.default(err, null, {left: 1, right: 2});
+
+      expect(err).to.have.property('stack').that.contains('addCurrent');
+
+      const lines = err.stack.split('\n');
+      const firstLine = (lines[0] === 'Error: something') ? 1 : 0;
+      expect(lines[firstLine]).to.contain('**breadcrumb:');
+      expect(lines[firstLine]).to.contain('addCurrent');
+      expect(lines[firstLine + 1]).not.to.contain('**breadcrumb:');
+      expect(lines[firstLine + 1]).to.contain('addCurrent');
+    });
+
+    it('adds current file into error\'s stack - empty message', function addCurrent() {
+      let err = new Error();
+
+      // fuck internet explorer
+      if (!err.stack) {
+        try {
+          throw err;
+        }
+        catch (e) {
+          err = e;
+        }
       }
+
+      notate.default(err, null, {left: 1, right: 2});
+
+      expect(err).to.have.property('stack').that.contains('addCurrent');
+
+      const lines = err.stack.split('\n');
+      const firstLine = (lines[0] === 'Error') ? 1 : 0;
+      expect(lines[firstLine]).to.contain('**breadcrumb:');
+      expect(lines[firstLine]).to.contain('addCurrent');
+      expect(lines[firstLine + 1]).not.to.contain('**breadcrumb:');
+      expect(lines[firstLine + 1]).to.contain('addCurrent');
+    });
+
+    it('can be run more than once', function twice() {
+      let err = new Error();
+
+      // fuck internet explorer
+      if (!err.stack) {
+        try {
+          throw err;
+        }
+        catch (e) {
+          err = e;
+        }
+      }
+
+      const first = function(err) {
+        notate.default(err);
+      };
+
+      const second = function(err) {
+        notate.default(err);
+      };
+
+      first(err);
+      second(err);
+
+      expect(err.stack).to.contain('twice');
+      expect(err.stack).to.contain('first');
+      expect(err.stack).to.contain('second');
     });
 
     it('merges keys into error', function() {
-      var err = new Error();
-      notate.add(err, null, {left: 1, right: 2});
+      const err = new Error();
+      notate.default(err, null, {left: 1, right: 2});
 
       expect(err).to.have.property('left', 1);
       expect(err).to.have.property('right', 2);
     });
 
     it('does not overwrite message', function() {
-      var err = new Error('original message');
-      notate.add(err, null, {message: 'new message'});
+      const err = new Error('original message');
+      notate.default(err, null, {message: 'new message'});
 
       expect(err).to.have.property('message', 'original message');
     });
 
     it('does just fine with no err', function() {
-      notate.add();
+      notate.default();
     });
 
     it('calls callback and returns true if err provided', function() {
-      var cb = sinon.stub();
-      var actual = notate.add({}, cb);
+      const cb = sinon.stub();
+      const actual = notate.default({}, cb);
 
       expect(actual).to.equal(true);
       expect(cb).to.have.property('callCount', 1);
     });
 
     it('does not call callback and returns false if err provided', function() {
-      var cb = sinon.stub();
-      var actual = notate.add(null, cb);
+      const cb = sinon.stub();
+      const actual = notate.default(null, cb);
 
       expect(actual).to.equal(false);
       expect(cb).to.have.property('callCount', 0);
     });
   });
 
-  // Helper functions
-  // ========
+  // Internals
+  // =======
 
-  describe('#_get', function() {
-    it('returns the current line', function currentLine() {
-      var actual = notate._get();
-      console.log(actual);
+  describe('#_getStackTrace', function() {
+    it('returns the current line for first line', function currentLine() {
+      const lines = notate._getStackTrace();
 
-      expect(actual).to.match(/currentLine/);
-    });
-
-    it('removes " at " at start of breadcrumb', function() {
-      notate._getStackTrace = sinon.stub().returns(['   at blah']);
-      var actual = notate._get();
-      expect(actual).to.equal('**breadcrumb: blah');
-    });
-
-    it('handles a no " at " breadcrumb', function() {
-      notate._getStackTrace = sinon.stub().returns(['blah']);
-      var actual = notate._get();
-      expect(actual).to.equal('**breadcrumb: blah');
-    });
-
-    it('empty returned if no stacktrace', function() {
-      notate._getStackTrace = sinon.stub().returns([]);
-      var actual = notate._get();
-      expect(actual).to.equal('**breadcrumb: <empty>');
+      expect(lines).to.have.property('0').that.contains('currentLine');
     });
   });
 });
