@@ -80,8 +80,11 @@ export function prettyPrint(err) {
   if (!err) {
     return '';
   }
+  if (!_isError(err)) {
+    return inspect(err);
+  }
 
-  // Nore special-casing for IE - util.inspect checks for message and description in keys,
+  // More special-casing for IE - util.inspect checks for message and description in keys,
   //   if found, switches to a basic err.toString() call, and we lose all extra data added
   //   to the error for debuggability.
   try {
@@ -256,4 +259,9 @@ export function _getIndentation(text) {
 export function _startsWithError(stack) {
   const v8 = /^[a-zA-z]+rror(:|\n)/;
   return Boolean(v8.test(stack));
+}
+
+export function _isError(err) {
+  return typeof err === 'object' && err !== null &&
+    (Object.prototype.toString.call(err) === '[object Error]' || err instanceof Error);
 }

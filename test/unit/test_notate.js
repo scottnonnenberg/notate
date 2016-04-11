@@ -51,6 +51,48 @@ describe('unit/notate', function() {
       expect(actual).not.to.contain(err.stack);
     });
 
+    it('prints out whole object if it is not an Error', function() {
+      err = {
+        message: 'this is the message',
+        stack: 'overridden stack',
+        one: 1,
+        two: 'two'
+      };
+
+      const actual = notate.prettyPrint(err);
+
+      expect(actual).to.contain('message:');
+      expect(actual).to.contain('stack:');
+      expect(actual).to.contain('one:');
+      expect(actual).to.contain('two:');
+    });
+
+    it('does not include message if it is enumerable', function() {
+      Object.defineProperty(err, 'message', {
+        value: 'this is the message',
+        enumerable: true,
+        configurable: true
+      });
+
+      expect(err.propertyIsEnumerable('message')).to.equal(true);
+
+      const actual = notate.prettyPrint(err);
+
+      expect(actual).to.contain('one:');
+      expect(actual).to.contain('two:');
+
+      expect(actual).not.to.contain('message:');
+      expect(err.propertyIsEnumerable('message')).to.equal(false);
+    });
+
+    it('moves description field to _description', function() {
+      err.description = 'description';
+
+      const actual = notate.prettyPrint(err);
+
+      expect(actual).to.contain('_description:');
+    });
+
     it('returns empty string if err is null', function() {
       const actual = notate.prettyPrint();
 
