@@ -172,6 +172,10 @@ function processResults(results) {
     return item.result.failures > 0;
   });
 
+  if (success) {
+    console.log('All tests succeeded!');
+  }
+
   return success ? 1 : 0;
 }
 
