@@ -22,11 +22,17 @@ function startTests(url, cb) {
   return tests;
 }
 
-function shutdown() {
-  server.kill();
-  if (tests) {
-    tests.kill();
+function shutdown(err) {
+  if (err) {
+    console.error(err.stack);
   }
+
+  server.kill();
+  tests.kill();
+
+  setTimeout(function() {
+    process.exit(testReturnCode);
+  }, 2000);
 }
 
 
@@ -35,14 +41,14 @@ const server = startServer();
 let tests;
 let testReturnCode = 1;
 
-server.on('close', function() {
-  process.exit(testReturnCode);
-});
-
 setTimeout(function() {
   tests = startTests(url, function(err, code) {
+    if (err) {
+      return shutdown(err);
+    }
+
     testReturnCode = code;
-    server.kill();
+    shutdown();
   });
 }, 500);
 
@@ -54,6 +60,10 @@ process.on('SIGTERM', function() {
 process.on('SIGINT', function() {
   console.log('cli-client: got SIGINT!');
   shutdown();
+});
+
+process.on('uncaughtException', function(err) {
+  shutdown(err);
 });
 
 process.on('exit', function() {

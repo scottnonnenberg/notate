@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 import { startProcess } from './util';
 import superagent from 'superagent';
 import _ from 'lodash';
@@ -119,10 +121,10 @@ function startRun(options, cb) {
         return cb(err);
       }
 
-      console.log('got result from start!');
-      console.log(res.body);
+      const jobs = res.body['js tests'];
+      console.log(`queued ${jobs.length} tests`);
 
-      return cb(null, res.body['js tests']);
+      return cb(null, jobs);
     });
 }
 
@@ -132,8 +134,6 @@ function pollForCompletion(tests, options, cb) {
   const payload = {
     'js tests': tests
   };
-
-  console.log('starting poll!');
 
   var next = function () {
     setTimeout(function() {
@@ -152,31 +152,44 @@ function pollForCompletion(tests, options, cb) {
       }
 
       const result = res.body;
-
-      console.log(res.body);
-
-      // TODO: print out progress report - number of jobs done so far!
+      const jobDetails = res.body['js tests'];
 
       if (!result.completed) {
+        processProgress(jobDetails);
         return next();
       }
 
-      return cb(null, res.body['js tests']);
+      return cb(null, jobDetails);
     });
 }
 
-function processResults(results) {
-  console.log(results);
+function processProgress(jobs) {
+  const summary = _.countBy(jobs, function(job) {
+    job = job || {};
+    const result = job.result || {};
 
-  const failure = _.some(results, function(item) {
+    return job.status || (result.failures ? 'failed' : 'succeeded');
+  });
+
+  console.log(summary);
+}
+
+function processResults(results) {
+  fs.writeFileSync('sauce_results.json', JSON.stringify(results, null, '  '));
+
+  const failures = _.filter(results, function(item) {
     return item.result.failures > 0;
   });
 
-  if (!failure) {
+  if (failures.length) {
+    console.log('Failures:');
+    console.log(failures);
+  }
+  else {
     console.log('All tests succeeded!');
   }
 
-  return failure ? 1 : 0;
+  return failures.length ? 1 : 0;
 }
 
 
@@ -187,6 +200,7 @@ function shutdown(err) {
 
   server.kill();
   ngrok.kill();
+
   setTimeout(function() {
     process.exit(testReturnCode);
   }, 2000);
@@ -222,10 +236,6 @@ const server = startServer();
 const ngrok = startNGrok();
 let testReturnCode = 1;
 
-server.on('close', function() {
-  process.exit(testReturnCode);
-});
-
 setTimeout(function() {
   startRun(options, function(err, tests) {
     if (err) {
@@ -255,6 +265,10 @@ process.on('SIGTERM', function() {
 process.on('SIGINT', function() {
   console.log('sauce-unit-tests: got SIGINT!');
   shutdown();
+});
+
+process.on('uncaughtException', function(err) {
+  shutdown(err);
 });
 
 process.on('exit', function() {
