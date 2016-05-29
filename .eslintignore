@@ -1,3 +1,5 @@
 dist
 node_modules
 coverage
+!.eslintrc.js
+test/setup/sauce_reporter.js
