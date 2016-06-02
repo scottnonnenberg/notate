@@ -1,10 +1,12 @@
-var path = require('path');
-var glob = require('glob');
+/* eslint-disable import/no-commonjs, import/no-extraneous-dependencies */
+
+const path = require('path');
+const glob = require('glob');
 
 
-const unitTests = glob.sync(path.resolve(__dirname, 'test/unit') + '/**/*.js');
+const unitTests = glob.sync(`${path.resolve(__dirname, 'test/unit')}/**/*.js`);
 const integrationTests =
-  glob.sync(path.resolve(__dirname, 'test/integration') + '/**/*.js');
+  glob.sync(`${path.resolve(__dirname, 'test/integration')}/**/*.js`);
 const allTests = unitTests.concat(integrationTests);
 
 module.exports = {
@@ -16,8 +18,8 @@ module.exports = {
 
     // sinon uses require() strangely: https://github.com/webpack/webpack/issues/304
     alias: {
-      sinon: 'node_modules/sinon/pkg/sinon.js'
-    }
+      sinon: 'node_modules/sinon/pkg/sinon.js',
+    },
   },
 
   module: {
@@ -26,29 +28,29 @@ module.exports = {
       test: /\.js$/,
       include: [
         path.resolve(__dirname, 'src'),
-        path.resolve(__dirname, 'test')
+        path.resolve(__dirname, 'test'),
       ],
-      loader: 'babel-loader'
+      loader: 'babel-loader',
     }],
 
     // sinon uses require() strangely: https://github.com/webpack/webpack/issues/304
     noParse: [
-      /\/sinon\.js/
-    ]
+      /\/sinon\.js/,
+    ],
   },
 
   // the entrypoint for our resultant files
   entry: {
-    notate: path.resolve(__dirname, 'src/entry.js'),
+    'notate': path.resolve(__dirname, 'src/entry.js'),
     'test/unit': unitTests,
     'test/integration': integrationTests,
-    'test/all': allTests
+    'test/all': allTests,
   },
 
   // file and path for the resultant files
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist/client'),
-    libraryTarget: 'umd'
-  }
+    libraryTarget: 'umd',
+  },
 };

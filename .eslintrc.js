@@ -1,26 +1,30 @@
+/* eslint-disable import/no-commonjs */
+
 module.exports = {
-  "env": {
-    "browser": true,
-    "commonjs": true,
-    "es6": true,
-    "node": true,
-    "mocha": true
+  settings: {
+    'import/resolver': {
+      node: {
+        paths: [__dirname],
+      },
+    },
   },
 
-  "parser": "babel-eslint",
-  "plugins": [
-    "thehelp"
+  plugins: [
+    'thehelp',
   ],
-  "extends": [
-    "eslint:recommended"
+  extends: [
+    'thehelp/core',
+    'thehelp/es2015',
+    // no functional because, at its core, this project is about modifying error objects!
   ],
 
-  "rules": {
-    "indent": [2, 2, {"SwitchCase": 1}],
-    "linebreak-style": [2, "unix"],
-    "quotes": [2, "single"],
-    "semi": [2, "always"],
-    "no-console": [0],
-    "thehelp/absolute-or-current-dir": [2]
-  }
+  rules: {
+    'complexity': 'off',
+    'max-statements': 'off',
+    'no-console': 'off',
+
+    'security/detect-object-injection': 'off',
+
+    'thehelp/absolute-or-current-dir': 'error',
+  },
 };

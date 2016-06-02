@@ -1,3 +1,5 @@
+/* eslint-disable max-params, complexity, max-statements */
+
 import { inspect } from 'util';
 
 import merge from './merge';
@@ -45,12 +47,12 @@ There are three more optional parameters:
 + `depth` allows you to put this method in your own helper, just set the depth to the
 number of stack frames you add between the client code and `notate()`.
 */
-export default function notate(err, cb, data, depth) {
+export default function notate(err, cb, data, providedDepth) {
   if (!err) {
     return false;
   }
 
-  depth = (depth || 0) + _internals.layerSize;
+  const depth = (providedDepth || 0) + _internals.layerSize;
 
   const stack = _getStackTrace(depth);
   const line = _getFirstLine(stack);
@@ -59,7 +61,10 @@ export default function notate(err, cb, data, depth) {
   merge(err, data);
 
   if (cb) {
+    // we really mean to omit the return here
+    /* eslint-disable callback-return */
     cb(err);
+    /* eslint-enable callback-return */
   }
 
   return true;
@@ -88,10 +93,10 @@ export function prettyPrint(err) {
   //   if found, switches to a basic err.toString() call, and we lose all extra data added
   //   to the error for debuggability.
   try {
-    if (err.propertyIsEnumerable('message')) {
+    if (propertyIsEnumerable.call(err, 'message')) {
       Object.defineProperty(err, 'message', {
         enumerable: false,
-        value: err.message
+        value: err.message,
       });
     }
 
@@ -104,10 +109,10 @@ export function prettyPrint(err) {
     // do nothing
   }
 
-  let result = inspect(err, {depth: 5});
+  let result = inspect(err, { depth: 5 });
 
   if (!err.log || err.log === 'warn' || err.log === 'error') {
-    result += '\n' + _prepareStack(err);
+    result += `\n${_prepareStack(err)}`;
   }
 
   return result;
@@ -116,14 +121,17 @@ export function prettyPrint(err) {
 // Internals
 // ========
 
+const MAX_LINES = 10;
+const propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
+
 export const _internals = {
   at: 'at ',
   prefix: '**breadcrumb: ',
   layerSize: 1,
-  truncation: '... (additional lines truncated)'
+  truncation: '... (additional lines truncated)',
 };
 
-export function _getStackTrace(depth) {
+export function _getStackTrace(providedDepth) {
   let err = new Error('Something');
 
   // fuck internet explorer
@@ -143,10 +151,10 @@ export function _getStackTrace(depth) {
 
   const lines = stack.split('\n');
 
-  //stack depth between _getStackTrace() and original caller
-  depth = (depth || 0) + _internals.layerSize;
+  // stack depth between _getStackTrace() and original caller
+  let depth = (providedDepth || 0) + _internals.layerSize;
 
-  if (lines && lines.length && /^Error/.test(lines[0])) {
+  if (lines && lines.length && (/^Error/).test(lines[0])) {
     depth += 1;
   }
 
@@ -167,10 +175,10 @@ export function _insert(err, line) {
     const lines = stack.split(v8);
     const updated = [lines[0], line].concat(lines.slice(1));
 
-    stack = updated.join('\n' + indentation + _internals.at);
+    stack = updated.join(`\n${indentation}${_internals.at}`);
   }
   else {
-    stack = indentation + line + (stack ? '\n' + stack : '');
+    stack = indentation + line + (stack ? `\n${stack}` : '');
   }
 
   try {
@@ -181,7 +189,7 @@ export function _insert(err, line) {
         value: stack,
         configurable: true,
         enumerable: false,
-        writable: true
+        writable: true,
       });
     }
     else if (descriptor.writable) {
@@ -192,19 +200,19 @@ export function _insert(err, line) {
         value: stack,
         configurable: true,
         enumerable: false,
-        writable: true
+        writable: true,
       });
     }
   }
-  catch (err) {
+  catch (error) {
     if (typeof console === 'undefined' || console || console.error) {
-      console.error('Error: Cannot add line to stack -- ' + err.message);
+      console.error(`Error: Cannot add line to stack -- ${error.message}`);
     }
   }
 }
 
-export function _prepareStack(err) {
-  err = err || {};
+export function _prepareStack(providedErr) {
+  const err = providedErr || {};
   let stack = err.alternateStack || err.stack || '';
   const cwd = process.cwd();
 
@@ -219,15 +227,16 @@ export function _prepareStack(err) {
   if (_startsWithError(stack)) {
     const lines = stack.split(/\n +at /);
     if (lines && lines.length) {
-      stack = indentation + _internals.at +
-        lines.slice(1).join('\n' + indentation + _internals.at);
+      stack = indentation + _internals.at
+        + lines.slice(1).join(`\n${indentation}${_internals.at}`);
     }
   }
 
   // limit to ten lines
   const lines = stack.split('\n');
-  if (lines.length > 10) {
-    stack = lines.slice(0, 10).join('\n') + '\n' + indentation + _internals.truncation;
+  if (lines.length > MAX_LINES) {
+    stack =
+      `${lines.slice(0, MAX_LINES).join('\n')}\n${indentation}${_internals.truncation}`;
   }
 
   return stack;
@@ -235,7 +244,7 @@ export function _prepareStack(err) {
 
 export function _getFirstLine(lines) {
   const v8 = /^ +at /;
-  let result = _internals.prefix + '<empty>';
+  let result = `${_internals.prefix}<empty>`;
 
   if (lines && lines.length) {
     result = lines[0];
@@ -259,7 +268,7 @@ export function _getIndentation(text) {
   const lines = text.split('\n');
   const last = lines[lines.length - 1];
 
-  const match = /^ +/.exec(last);
+  const match = (/^ +/).exec(last);
   if (match) {
     return match[0];
   }
@@ -273,6 +282,6 @@ export function _startsWithError(stack) {
 }
 
 export function _isError(err) {
-  return typeof err === 'object' && err !== null &&
-    (Object.prototype.toString.call(err) === '[object Error]' || err instanceof Error);
+  return typeof err === 'object' && err !== null
+    && (Object.prototype.toString.call(err) === '[object Error]' || err instanceof Error);
 }

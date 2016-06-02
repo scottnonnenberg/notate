@@ -1,18 +1,19 @@
 import fs from 'fs';
 
-import { startProcess, waitForCompletion } from './util';
 import superagent from 'superagent';
 import _ from 'lodash';
 import config from 'config';
 
+import { startProcess, waitForCompletion } from './util';
+
+
+const HALF_SECOND = 500;
 
 function startServer(options) {
   const { command, args } = options;
   const server = startProcess(command, args);
 
-  server.on('close', function(code) {
-    console.log(`sauce-tests: server exited with code ${code}`);
-  });
+  server.on('close', code => console.log(`sauce-tests: server exited with code ${code}`));
 
   return server;
 }
@@ -21,28 +22,26 @@ function startTunnel(options) {
   const { command, args } = options;
   const tunnel = startProcess(command, args);
 
-  tunnel.on('close', function(code) {
-    console.log(`sauce-tests: tunnel exited with code ${code}`);
-  });
+  tunnel.on('close', code => console.log(`sauce-tests: tunnel exited with code ${code}`));
 
   return tunnel;
 }
 
 function startTests(options, cb) {
-  const {username, key, url, platforms, timeout, framework} = options;
+  const { username, key, url, platforms, timeout, framework } = options;
   const target = `https://saucelabs.com/rest/v1/${username}/js-tests`;
   const payload = {
     platforms,
     url,
     timeout,
-    framework
+    framework,
   };
 
   superagent
     .post(target)
     .send(payload)
     .auth(username, key)
-    .end(function(err, res) {
+    .end((err, res) => {
       if (err) {
         return cb(err);
       }
@@ -54,27 +53,27 @@ function startTests(options, cb) {
     });
 }
 
+function delayRecurse(fn, pollTimeout, args) {
+  const array = Array.prototype.slice.call(args, 0);
+  setTimeout(() => fn(...array), pollTimeout);
+}
+
 function pollForTestCompletion(jobs, options, cb) {
-  const {username, key, pollTimeout} = options;
+  const args = arguments; // eslint-disable-line
+  const { username, key, pollTimeout } = options;
   const target = `https://saucelabs.com/rest/v1/${username}/js-tests/status`;
   const payload = {
-    'js tests': jobs
-  };
-
-  var next = function () {
-    setTimeout(function() {
-      pollForTestCompletion(jobs, options, cb);
-    }, pollTimeout);
+    'js tests': jobs,
   };
 
   superagent
     .post(target)
     .send(payload)
     .auth(username, key)
-    .end(function(err, res) {
+    .end((err, res) => {
       if (err) {
-        console.log('Error pulling completion status: ' + err.stack);
-        return next();
+        console.log(`Error pulling completion status: ${err.stack}`);
+        return delayRecurse(pollForTestCompletion, pollTimeout, args);
       }
 
       const result = res.body;
@@ -82,7 +81,7 @@ function pollForTestCompletion(jobs, options, cb) {
 
       if (!result.completed) {
         processProgress(jobDetails);
-        return next();
+        return delayRecurse(pollForTestCompletion, pollTimeout, args);
       }
 
       return cb(null, jobDetails);
@@ -103,9 +102,8 @@ function isFailure(result) {
 }
 
 function processProgress(results) {
-
-  const summary = _.countBy(results, function(result) {
-    result = result || {};
+  const summary = _.countBy(results, providedResult => {
+    const result = providedResult || {};
     return result.status || (isFailure(result) ? 'failed' : 'succeeded');
   });
 
@@ -134,9 +132,9 @@ function shutdown(err) {
     console.error(err.stack);
   }
 
-  waitForCompletion(server, function() {
-    waitForCompletion(tunnel, function() {
-      process.exit(testReturnCode);
+  waitForCompletion(server, () => {
+    waitForCompletion(tunnel, () => {
+      process.exitCode = testReturnCode;
     });
   });
 }
@@ -147,13 +145,13 @@ const server = startServer(options.serverOptions);
 const tunnel = startTunnel(options.tunnelOptions);
 let testReturnCode = 1;
 
-setTimeout(function() {
-  startTests(options, function(err, jobs) {
+setTimeout(() => {
+  startTests(options, (err, jobs) => {
     if (err) {
       return shutdown(err);
     }
 
-    pollForTestCompletion(jobs, options, function(err, result) {
+    pollForTestCompletion(jobs, options, (err, result) => {
       if (err) {
         return shutdown(err);
       }
@@ -163,25 +161,18 @@ setTimeout(function() {
       return shutdown();
     });
   });
-}, 500);
+}, HALF_SECOND);
 
-// TODO: cancel outstanding jobs on cancel? starting a full run takes a long time!
-//   https://github.com/axemclion/grunt-saucelabs/blob/master/src/Job.js#L181
-
-process.on('SIGTERM', function() {
+process.on('SIGTERM', () => {
   console.log('sauce-tests: got SIGTERM!');
   shutdown();
 });
 
-process.on('SIGINT', function() {
+process.on('SIGINT', () => {
   console.log('sauce-tests: got SIGINT!');
   shutdown();
 });
 
-process.on('uncaughtException', function(err) {
-  shutdown(err);
-});
+process.on('uncaughtException', err => shutdown(err));
 
-process.on('exit', function() {
-  console.log('sauce-tests: shutting down');
-});
+process.on('exit', () => console.log('sauce-tests: shutting down'));

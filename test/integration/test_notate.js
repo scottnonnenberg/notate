@@ -1,16 +1,20 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import * as notate from 'src/notate';
+import {
+  default as notate,
+  prettyPrint,
+  _getStackTrace,
+} from 'src/notate';
 
 
-describe('integration/notate', function() {
+describe('integration/notate', () => {
   // Public API
   // =======
 
-  describe('complete scenario', function() {
-    it('works', function() {
-      const makeError = function() {
+  describe('complete scenario', () => {
+    it('works', () => {
+      function makeError() {
         let error = new Error('user attempted something!');
 
         // fuck internet explorer
@@ -24,11 +28,11 @@ describe('integration/notate', function() {
         }
 
         return error;
-      };
+      }
 
-      const annotateError = function(err) {
-        notate.default(err, null, {user: 'username'});
-      };
+      function annotateError(err) {
+        notate(err, null, { user: 'username' });
+      }
 
       const error = makeError();
 
@@ -43,7 +47,7 @@ describe('integration/notate', function() {
         console.log(error.alternateStack || error.stack);
       }
 
-      const pretty = notate.prettyPrint(error);
+      const pretty = prettyPrint(error);
       if (typeof console === 'undefined' || console || console.log) {
         console.log('pretty error:');
         console.log(pretty);
@@ -60,7 +64,7 @@ describe('integration/notate', function() {
     });
   });
 
-  describe('#notate (default)', function() {
+  describe('#notate (default)', () => {
     it('adds current file into error\'s stack', function addCurrent() {
       let err = new Error('something');
 
@@ -74,13 +78,13 @@ describe('integration/notate', function() {
         }
       }
 
-      notate.default(err, null, {left: 1, right: 2});
+      notate(err, null, { left: 1, right: 2 });
 
       const stack = err.alternateStack || err.stack;
       expect(stack).to.contain('addCurrent');
 
       const lines = stack.split('\n');
-      const firstLine = (lines[0] === 'Error: something') ? 1 : 0;
+      const firstLine = lines[0] === 'Error: something' ? 1 : 0;
       expect(lines[firstLine]).to.contain('**breadcrumb:');
       expect(lines[firstLine]).to.contain('addCurrent');
       expect(lines[firstLine + 1]).not.to.contain('**breadcrumb:');
@@ -100,13 +104,13 @@ describe('integration/notate', function() {
         }
       }
 
-      notate.default(err, null, {left: 1, right: 2});
+      notate(err, null, { left: 1, right: 2 });
 
       const stack = err.alternateStack || err.stack;
       expect(stack).to.contain('addCurrent');
 
       const lines = stack.split('\n');
-      const firstLine = (lines[0] === 'Error' || lines[0] === 'Error: ') ? 1 : 0;
+      const firstLine = lines[0] === 'Error' || lines[0] === 'Error: ' ? 1 : 0;
       expect(lines[firstLine]).to.contain('**breadcrumb:');
       expect(lines[firstLine]).to.contain('addCurrent');
       expect(lines[firstLine + 1]).not.to.contain('**breadcrumb:');
@@ -126,13 +130,13 @@ describe('integration/notate', function() {
         }
       }
 
-      const first = function(err) {
-        notate.default(err);
-      };
+      function first(err) {
+        notate(err);
+      }
 
-      const second = function(err) {
-        notate.default(err);
-      };
+      function second(err) {
+        notate(err);
+      }
 
       first(err);
       second(err);
@@ -144,36 +148,36 @@ describe('integration/notate', function() {
       expect(stack).to.contain('second');
     });
 
-    it('merges keys into error', function() {
+    it('merges keys into error', () => {
       const err = new Error();
-      notate.default(err, null, {left: 1, right: 2});
+      notate(err, null, { left: 1, right: 2 });
 
       expect(err).to.have.property('left', 1);
       expect(err).to.have.property('right', 2);
     });
 
-    it('does not overwrite message', function() {
+    it('does not overwrite message', () => {
       const err = new Error('original message');
-      notate.default(err, null, {message: 'new message'});
+      notate(err, null, { message: 'new message' });
 
       expect(err).to.have.property('message', 'original message');
     });
 
-    it('does just fine with no err', function() {
-      notate.default();
+    it('does just fine with no err', () => {
+      notate();
     });
 
-    it('calls callback and returns true if err provided', function() {
+    it('calls callback and returns true if err provided', () => {
       const cb = sinon.stub();
-      const actual = notate.default({}, cb);
+      const actual = notate({}, cb);
 
       expect(actual).to.equal(true);
       expect(cb).to.have.property('callCount', 1);
     });
 
-    it('does not call callback and returns false if err provided', function() {
+    it('does not call callback and returns false if err provided', () => {
       const cb = sinon.stub();
-      const actual = notate.default(null, cb);
+      const actual = notate(null, cb);
 
       expect(actual).to.equal(false);
       expect(cb).to.have.property('callCount', 0);
@@ -183,9 +187,9 @@ describe('integration/notate', function() {
   // Internals
   // =======
 
-  describe('#_getStackTrace', function() {
+  describe('#_getStackTrace', () => {
     it('returns the current line for first line', function currentLine() {
-      const lines = notate._getStackTrace();
+      const lines = _getStackTrace();
 
       expect(lines).to.have.property('0').that.contains('currentLine');
     });

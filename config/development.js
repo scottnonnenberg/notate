@@ -38,7 +38,7 @@ var platforms = [
   ['Mac 10.10', 'safari', '8'], // 0.29%
 
   // Edge
-  ['Windows 10', 'microsoftedge', '13'] // 0.99%
+  ['Windows 10', 'microsoftedge', '13'], // 0.99%
 
   // The pain!
   // ['Windows 2012', 'internet explorer', '10'], // works
@@ -60,12 +60,12 @@ module.exports = {
 
     tunnelOptions: {
       command: null,
-      args: null
+      args: null,
     },
 
     serverOptions: {
       command: 'npm',
-      args: ['run', 'serve', '--', '8001']
-    }
-  }
+      args: ['run', 'serve', '--', '8001'],
+    },
+  },
 };

@@ -1,4 +1,7 @@
+/* eslint-disable camelcase */
+
 import fs from 'fs';
+import { oneLine } from 'common-tags';
 
 import superagent from 'superagent';
 import _ from 'lodash';
@@ -6,13 +9,13 @@ import config from 'config';
 
 
 function getPlatforms(options, cb) {
-  const {username, key} = options;
+  const { username, key } = options;
   const target = 'https://saucelabs.com/rest/v1/info/platforms/webdriver';
 
   superagent
     .get(target)
     .auth(username, key)
-    .end(function(err, res) {
+    .end((err, res) => {
       if (err) {
         return cb(err);
       }
@@ -23,17 +26,18 @@ function getPlatforms(options, cb) {
 
 function displayPlatforms(platforms) {
   // eliminate any weird dev/beta versions
-  platforms = _.reject(platforms, platform => isNaN(platform.short_version = parseFloat(platform.short_version)));
+  const clean = _.chain(platforms)
+    .reject(platforms, platform =>
+      isNaN(platform.short_version = parseFloat(platform.short_version))
+    )
+    .orderBy(platforms, ['api_name', 'short_version', 'os'], ['asc', 'desc', 'asc'])
+    .map(platforms, platform => oneLine`
+      ['${platform.os}', '${platform.api_name}', '${platform.short_version}']
+      (${platform.long_name}, ${platform.long_version}
+    `)
+    .value();
 
-
-  platforms = _.orderBy(platforms, ['api_name', 'short_version', 'os'], ['asc', 'desc', 'asc']);
-
-  platforms = _.map(platforms, function(platform) {
-    return `['${platform.os}', '${platform.api_name}', '${platform.short_version}']` +
-      ` (${platform.long_name}, ${platform.long_version})`;
-  });
-
-  console.log(platforms.join('\n'));
+  console.log(clean.join('\n'));
 }
 
 const command = process.argv[2];
@@ -41,10 +45,11 @@ const file = 'sauce_platforms.json';
 const options = config.get('sauce');
 
 if (command === 'get') {
-  getPlatforms(options, function(err, platforms) {
+  getPlatforms(options, (err, platforms) => {
     if (err) {
       console.error(err.stack);
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
 
     fs.writeFileSync(file, JSON.stringify(platforms));
