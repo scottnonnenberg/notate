@@ -85,6 +85,19 @@
       "maxSubjectLength": 72
     }
   },
+  "keywords": [
+    "annotate",
+    "error",
+    "stack",
+    "async",
+    "cb",
+    "err",
+    "if",
+    "return",
+    "debuggability",
+    "debug",
+    "prettyPrint"
+  ],
   "author": "Scott Nonnenberg <scott@nonnenberg.com>",
   "license": "MIT",
   "homepage": "https://github.com/scottnonnenberg/notate",
