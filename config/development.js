@@ -52,6 +52,8 @@ module.exports = {
     key: null,
     url: null,
 
+    name: 'notate',
+
     framework: 'mocha',
     platforms: platforms,
 

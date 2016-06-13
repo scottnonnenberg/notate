@@ -24,6 +24,7 @@
     "watch-client": "npm run build-client -- --watch",
     "watch-client-coverage": "npm run build-client -- --watch --config webpack.config.coverage.js",
 
+    "test-sauce": "babel-node scripts/sauce_tests.js",
     "test-client": "time mocha-phantomjs",
     "test-client-coverage": "time mocha-phantomjs --hooks ./test/extract_coverage_hook.js",
 

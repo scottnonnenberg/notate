@@ -4,6 +4,7 @@ import superagent from 'superagent';
 import _ from 'lodash';
 import config from 'config';
 
+import info from '../package.json';
 import { startProcess, waitForCompletion } from './util';
 
 
@@ -27,14 +28,18 @@ function startTunnel(options) {
   return tunnel;
 }
 
+
 function startTests(options, cb) {
-  const { username, key, url, platforms, timeout, framework } = options;
+  // https://wiki.saucelabs.com/display/DOCS/JavaScript+Unit+Testing+Methods
+  const { username, key, name, url, platforms, timeout, framework } = options;
   const target = `https://saucelabs.com/rest/v1/${username}/js-tests`;
   const payload = {
     platforms,
     url,
     timeout,
     framework,
+    name,
+    build: info.version,
   };
 
   superagent
