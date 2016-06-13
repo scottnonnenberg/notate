@@ -24,7 +24,5 @@ module.exports = {
     'no-console': 'off',
 
     'security/detect-object-injection': 'off',
-
-    'thehelp/absolute-or-current-dir': 'error',
   },
 };
