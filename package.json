@@ -3,52 +3,40 @@
   "version": "0.1.0",
   "description": "Extra err.stack entries for debuggability. Better than your plain 'if (err) { return cb(err) }'",
   "main": "dist/server/notate.js",
-
   "scripts": {
     "clean": "rm -rf dist/client/* dist/server/* coverage/client/* coverage/server/* coverage/combined/*",
     "lint": "time eslint .",
-
     "pre-commit": "npm run clean && npm run lint && npm run build-client && npm run test",
     "pre-publish": "npm run pre-commit && npm run clean && npm run build-server && npm run build-client-production",
-
     "test": "npm run test-client-cli-all && npm run test-server-all",
-
     "start": "npm run serve",
     "serve": "python -m SimpleHTTPServer 8001",
-
     "build-server": "babel src --out-dir dist/server",
-
     "build-client": "time webpack",
     "build-client-coverage": "npm run build-client -- --config webpack.config.coverage.js",
     "build-client-production": "npm run build-client -- --config webpack.config.production.js",
     "watch-client": "npm run build-client -- --watch",
     "watch-client-coverage": "npm run build-client -- --watch --config webpack.config.coverage.js",
-
     "test-sauce": "babel-node scripts/sauce_tests.js",
     "test-client": "time mocha-phantomjs",
     "test-client-coverage": "time mocha-phantomjs --hooks ./test/extract_coverage_hook.js",
-
     "test-client-unit": "npm run test-client -- http://localhost:8001/test/unit",
     "test-client-unit-coverage": "npm run test-client-coverage -- http://localhost:8001/test/unit",
     "test-client-integration": "npm run test-client -- http://localhost:8001/test/integration",
     "test-client-integration-coverage": "npm run test-client-coverage -- http://localhost:8001/test/integration",
     "test-client-all": "npm run test-client -- http://localhost:8001/test/all",
     "test-client-all-coverage": "npm run test-client-coverage -- http://localhost:8001/test/all",
-
     "build-client-report": "time istanbul report --include coverage/client/coverage.json --dir coverage/client",
     "posttest-client-unit-coverage": "npm run build-client-report",
     "posttest-client-integration-coverage": "npm run build-client-report",
     "posttest-client-all-coverage": "npm run build-client-report",
-
     "test-client-cli": "NODE_ENV=test babel-node scripts/cli_client.js",
     "test-client-cli-unit": "npm run test-client-cli -- http://localhost:8001/test/unit.html",
     "test-client-cli-integration": "npm run test-client-cli -- http://localhost:8001/test/integration.html",
     "test-client-cli-all": "npm run test-client-cli -- http://localhost:8001/test/all.html",
-
     "test-server": "NODE_ENV=test time mocha --recursive --compilers js:babel-core/register --require test/setup/mocha.js",
     "test-server-watch": "npm run test-server -- --watch",
     "test-server-coverage": "NODE_ENV=test time babel-node ./node_modules/.bin/isparta cover _mocha -- --recursive --require test/setup/mocha.js",
-
     "test-server-unit": "npm run test-server -- -s 3 -t 150 test/unit",
     "test-server-unit-watch": "npm run test-server-watch -- -s 3 -t 150 test/unit",
     "test-server-unit-coverage": "npm run test-server-coverage -- test/unit",
@@ -58,15 +46,12 @@
     "test-server-all": "npm run test-server -- -s 15 test/unit test/integration",
     "test-server-all-watch": "npm run test-server-watch -- -s 15 test/unit test/integration",
     "test-server-all-coverage": "npm run test-server-coverage -- test/unit test/integration",
-
     "combine-coverage": "istanbul report --dir coverage/combined",
     "full-coverage-run": "npm run test-server-all-coverage && npm run test-client-all-coverage && npm run combine-coverage",
-
     "open-server-coverage": "open coverage/server/lcov-report/index.html",
     "open-client-coverage": "open coverage/client/lcov-report/index.html",
     "open-combined-coverage": "open coverage/combined/lcov-report/index.html"
   },
-
   "devDependencies": {
     "@scottnonnenberg/eslint-config-thehelp": "0.5.0",
     "app-module-path": "1.0.6",
@@ -79,6 +64,7 @@
     "chai": "3.5.0",
     "common-tags": "1.1.1",
     "config": "1.20.1",
+    "ghooks": "1.2.3",
     "isparta": "4.0.0",
     "istanbul": "0.4.2",
     "lodash": "4.9.0",
@@ -86,10 +72,24 @@
     "mocha-phantomjs": "4.0.2",
     "phantomjs-prebuilt": "2.1.5",
     "sinon": "1.17.3",
+    "standard-version": "2.3.0",
     "superagent": "1.8.3",
+    "validate-commit-msg": "2.6.1",
     "webpack": "1.12.14"
   },
-
-  "author": "Scott Nonnenberg",
-  "license": "ISC"
+  "config": {
+    "ghooks": {
+      "commit-msg": "validate-commit-msg"
+    },
+    "validate-commit-msg": {
+      "maxSubjectLength": 72
+    }
+  },
+  "author": "Scott Nonnenberg <scott@nonnenberg.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/scottnonnenberg/notate",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:scottnonnenberg/notate.git"
+  }
 }
