@@ -2,7 +2,7 @@
   "name": "@scottnonnenberg/notate",
   "version": "0.2.0",
   "description": "Extra err.stack entries for debuggability. Better than your plain 'if (err) { return cb(err) }'",
-  "main": "dist/server/notate.js",
+  "main": "dist/server/index.js",
   "scripts": {
     "release": "standard-version",
     "clean": "rm -rf dist/client/* dist/server/* coverage/client/* coverage/server/* coverage/combined/*",

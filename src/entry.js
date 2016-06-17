@@ -1,3 +1,5 @@
-import notate from './notate';
+/* eslint-disable import/no-commonjs */
 
-export default notate;
+const index = require('./index');
+
+module.exports = index;
