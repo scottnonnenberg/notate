@@ -28,6 +28,8 @@ describe('unit/notate', () => {
       Object.defineProperty(err, 'stack', {
         value: 'overridden stack',
         enumerable: false,
+        configurable: true,
+        writable: true,
       });
     });
 
@@ -59,6 +61,67 @@ describe('unit/notate', () => {
       const actual = prettyPrint(err);
 
       expect(actual).not.to.contain(err.stack);
+    });
+
+    it('truncates callstack at 10 lines by default', () => {
+      err.stack = 'line 1\n'
+        + 'line 2\n'
+        + 'line 3\n'
+        + 'line 4\n'
+        + 'line 5\n'
+        + 'line 6\n'
+        + 'line 7\n'
+        + 'line 8\n'
+        + 'line 9\n'
+        + 'line 10\n'
+        + 'line 11';
+
+      const expected = '{ [Error: this is the message] one: 1, two: \'two\' }\n'
+        + 'line 1\n'
+        + 'line 2\n'
+        + 'line 3\n'
+        + 'line 4\n'
+        + 'line 5\n'
+        + 'line 6\n'
+        + 'line 7\n'
+        + 'line 8\n'
+        + 'line 9\n'
+        + 'line 10\n'
+        + '... (additional lines truncated)';
+
+      const actual = prettyPrint(err);
+
+      expect(actual).to.equal(expected);
+    });
+
+    it('truncates callstack at five lines when specified', () => {
+      err.stack = 'line 1\n'
+        + 'line 2\n'
+        + 'line 3\n'
+        + 'line 4\n'
+        + 'line 5\n'
+        + 'line 6\n'
+        + 'line 7\n'
+        + 'line 8\n'
+        + 'line 9\n'
+        + 'line 10\n'
+        + 'line 11';
+
+      const expected = '{ [Error: this is the message] one: 1, two: \'two\' }\n'
+        + 'line 1\n'
+        + 'line 2\n'
+        + 'line 3\n'
+        + 'line 4\n'
+        + 'line 5\n'
+        + '... (additional lines truncated)';
+
+      const options = {
+        maxLines: 5,
+      };
+
+      const actual = prettyPrint(err, options);
+
+      expect(actual).to.equal(expected);
     });
 
     it('prints out whole object if it is not an Error', () => {

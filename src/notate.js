@@ -105,7 +105,7 @@ instances of `process.cwd()` (if we're on the server).
 You can prevent the stack from being printed by setting `err.log` to something other
 than 'warn' or 'error'.
 */
-export function prettyPrint(err) {
+export function prettyPrint(err, providedOptions) {
   if (!err) {
     return '';
   }
@@ -136,7 +136,7 @@ export function prettyPrint(err) {
   let result = inspect(err, { depth: 5 });
 
   if (!err.log || err.log === 'warn' || err.log === 'error') {
-    result += `\n${_prepareStack(err)}`;
+    result += `\n${_prepareStack(err, providedOptions)}`;
   }
 
   return result;
@@ -253,7 +253,7 @@ export function _insert(err, line) {
   }
 }
 
-export function _prepareStack(providedErr) {
+export function _prepareStack(providedErr, providedOptions) {
   const err = providedErr || {};
   let stack = err.alternateStack || err.stack || '';
   const cwd = process.cwd();
@@ -263,6 +263,8 @@ export function _prepareStack(providedErr) {
   }
 
   const indentation = _getIndentation(stack);
+  const options = providedOptions || {};
+  const maxLines = options.maxLines || MAX_LINES;
 
   // V8-style stacks include the error message before showing the actual stack;
   // remove it, even if it has newlines in it, by using each line's prefix to split it.
@@ -276,9 +278,9 @@ export function _prepareStack(providedErr) {
 
   // limit to ten lines
   const lines = stack.split('\n');
-  if (lines.length > MAX_LINES) {
+  if (lines.length > maxLines) {
     stack =
-      `${lines.slice(0, MAX_LINES).join('\n')}\n${indentation}${_internals.truncation}`;
+      `${lines.slice(0, maxLines).join('\n')}\n${indentation}${_internals.truncation}`;
   }
 
   return stack;

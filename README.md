@@ -59,7 +59,8 @@ import { default as notate, justNotate, prettyPrint } from '@scottnonnenberg/not
 
 * `notate(cb, err, data, level)` (default) - give it your callback, potential error, and any data you'd like merged into the error for later debugging. Throws if `cb` is not a function. `level` can be used to capture a different callstack entry other than the immediate caller of this function.
 * `justNotate(err, data, level)` - just like `notate()` but without the `cb` parameter
-* `prettyPrint(err)` - takes an `Error` which has additional stack entries and additional data added to it and prints it to a string. Note that, for some browsers, we need to use a new `alternateStack` key to store the annotated stack. `prettyPrint()` will handle this properly.
+* `prettyPrint(err, options)` - takes an `Error` which has additional stack entries and additional data added to it and prints it to a string. Note that, for some browsers, we need to use a new `alternateStack` key to store the annotated stack. `prettyPrint()` will handle this properly. `options` takes these keys:
+  * `maxLines`: maximum number of callstack lines to include (default: 10)
 
 ## License
 
