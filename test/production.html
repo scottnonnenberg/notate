@@ -17,11 +17,11 @@
     <script src="/test/setup/sauce_reporter.js"></script>
     <script type="text/javascript">
       var expect = window.chai.expect;
-      var notate = window.default; // TODO: this is ugly!
+      var notate = window.justNotate; // TODO: this is ugly!
 
       describe('Notate production!', function() {
         it('is accessible', function() {
-          expect(notate).to.exist;
+          expect(justNotate).to.exist;
         });
 
         it('annotates an error', function annotates() {
@@ -37,7 +37,7 @@
             }
           }
 
-          notate(err);
+          justNotate(err);
           expect(err.stack).to.contain('**breadcrumb: Context.annotates');
         });
       });

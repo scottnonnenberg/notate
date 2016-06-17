@@ -1,8 +1,9 @@
 import { expect } from 'chai';
 
 import {
-  default as notate,
+  justNotate,
   prettyPrint,
+  _isFunction,
   _insert,
   _prepareStack,
   _getFirstLine,
@@ -110,7 +111,7 @@ describe('unit/notate', () => {
 
     it('handles an annotated non-vanilla error', () => {
       const err = new TypeError('something');
-      notate(err);
+      justNotate(err);
       const actual = prettyPrint(err);
 
       const r = /TypeError/g;
@@ -124,6 +125,30 @@ describe('unit/notate', () => {
 
   // Internals
   // ========
+
+  describe('#isFunction', () => {
+    it('returns false for falsey parameter', () => {
+      expect(_isFunction()).to.equal(false);
+      expect(_isFunction(null)).to.equal(false);
+      expect(_isFunction('')).to.equal(false);
+    });
+
+    it('returns false for object parameter', () => {
+      expect(_isFunction({})).to.equal(false);
+    });
+
+    it('returns false for other types', () => {
+      expect(_isFunction(/regex/)).to.equal(false);
+      expect(_isFunction('string')).to.equal(false);
+      expect(_isFunction(5)).to.equal(false);
+      expect(_isFunction(new Date())).to.equal(false);
+    });
+
+    it('returns true if it is a function', () => {
+      expect(_isFunction(() => {})).to.equal(true);
+      expect(_isFunction(it)).to.equal(true);
+    });
+  });
 
   describe('#_insert', () => {
     it('puts current file into stack', () => {
@@ -249,10 +274,10 @@ describe('unit/notate', () => {
       expect(err).to.have.property('stack').not.that.contains(line);
     });
 
-    it('fixes stack property if it is enumerable/configurable', () => {
+    it('fixes stack property if it is configurable but not writeable', () => {
       const err = Object.create(null);
       Object.defineProperty(err, 'stack', {
-        writable: true,
+        writable: false,
         enumerable: true,
         configurable: true,
         value: 'something',

@@ -32,7 +32,7 @@ So after an error happens deep in some library, you know how it propagated throu
 code afterwards.
 
 ```
-if (notate(err, cb, {user: user})) {
+if (notate(cb, err, {user: user})) {
   return;
 }
 ```
@@ -47,18 +47,16 @@ There are three more optional parameters:
 + `depth` allows you to put this method in your own helper, just set the depth to the
 number of stack frames you add between the client code and `notate()`.
 */
-export default function notate(err, cb, data, providedDepth) {
+export default function notate(cb, err, data, providedDepth) {
+  if (cb && !_isFunction(cb)) {
+    throw new Error('notate: provided first parameter cb was not a function');
+  }
   if (!err) {
     return false;
   }
 
   const depth = (providedDepth || 0) + _internals.layerSize;
-
-  const stack = _getStackTrace(depth);
-  const line = _getFirstLine(stack);
-
-  _insert(err, line);
-  merge(err, data);
+  justNotate(err, data, depth);
 
   if (cb) {
     // we really mean to omit the return here
@@ -69,6 +67,32 @@ export default function notate(err, cb, data, providedDepth) {
 
   return true;
 }
+
+/*
+`justNotate` does the same thing as `notate`, without taking (and requiring) the initial
+`cb` parameter.
+*/
+export function justNotate(err, data, providedDepth) {
+  if (!err) {
+    return false;
+  }
+
+  try {
+    const depth = (providedDepth || 0) + _internals.layerSize;
+
+    const stack = _getStackTrace(depth);
+    const line = _getFirstLine(stack);
+
+    _insert(err, line);
+    merge(err, data);
+  }
+  catch (e) {
+    // do nothing; we must never crash!
+  }
+
+  return true;
+}
+
 
 /*
 `prettyPrint()  ` prints out errors. Now that you're using `breadcrumbs.add()` to annotate
@@ -94,7 +118,7 @@ export function prettyPrint(err) {
   //   to the error for debuggability.
   try {
     if (propertyIsEnumerable.call(err, 'message')) {
-      Object.defineProperty(err, 'message', {
+      defineProperty(err, 'message', {
         enumerable: false,
         value: err.message,
       });
@@ -123,6 +147,9 @@ export function prettyPrint(err) {
 
 const MAX_LINES = 10;
 const propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
+const getDescriptor = Object.getOwnPropertyDescriptor;
+const defineProperty = Object.defineProperty;
+
 
 export const _internals = {
   at: 'at ',
@@ -130,6 +157,17 @@ export const _internals = {
   layerSize: 1,
   truncation: '... (additional lines truncated)',
 };
+
+export function _isFunction(fn) {
+  if (!fn) {
+    return false;
+  }
+  if (typeof fn !== 'function') {
+    return false;
+  }
+
+  return true;
+}
 
 export function _getStackTrace(providedDepth) {
   let err = new Error('Something');
@@ -182,10 +220,14 @@ export function _insert(err, line) {
   }
 
   try {
-    const descriptor = Object.getOwnPropertyDescriptor(err, 'stack');
-    if (!descriptor || descriptor.enumerable && descriptor.configurable) {
-      // On Android 4.4, TypeError objects have an enumerable/configurable stack prop
-      Object.defineProperty(err, 'stack', {
+    if (!getDescriptor || !defineProperty) {
+      err.stack = stack;
+    }
+
+    const descriptor = getDescriptor(err, 'stack');
+    if (!descriptor || descriptor.configurable
+      && (!descriptor.writable || descriptor.enumerable)) {
+      defineProperty(err, 'stack', {
         value: stack,
         configurable: true,
         enumerable: false,
@@ -196,7 +238,7 @@ export function _insert(err, line) {
       err.stack = stack;
     }
     else {
-      Object.defineProperty(err, 'alternateStack', {
+      defineProperty(err, 'alternateStack', {
         value: stack,
         configurable: true,
         enumerable: false,
@@ -205,7 +247,7 @@ export function _insert(err, line) {
     }
   }
   catch (error) {
-    if (typeof console === 'undefined' || console || console.error) {
+    if (typeof console !== 'undefined' && console && console.error) {
       console.error(`Error: Cannot add line to stack -- ${error.message}`);
     }
   }

@@ -3,6 +3,7 @@ import sinon from 'sinon';
 
 import {
   default as notate,
+  justNotate,
   prettyPrint,
   _getStackTrace,
 } from 'src/notate';
@@ -31,7 +32,7 @@ describe('integration/notate', () => {
       }
 
       function annotateError(err) {
-        notate(err, null, { user: 'username' });
+        justNotate(err, { user: 'username' });
       }
 
       const error = makeError();
@@ -64,7 +65,7 @@ describe('integration/notate', () => {
     });
   });
 
-  describe('#notate (default)', () => {
+  describe('#justNotate', () => {
     it('adds current file into error\'s stack', function addCurrent() {
       let err = new Error('something');
 
@@ -78,7 +79,7 @@ describe('integration/notate', () => {
         }
       }
 
-      notate(err, null, { left: 1, right: 2 });
+      justNotate(err, { left: 1, right: 2 });
 
       const stack = err.alternateStack || err.stack;
       expect(stack).to.contain('addCurrent');
@@ -104,7 +105,7 @@ describe('integration/notate', () => {
         }
       }
 
-      notate(err, null, { left: 1, right: 2 });
+      justNotate(err, { left: 1, right: 2 });
 
       const stack = err.alternateStack || err.stack;
       expect(stack).to.contain('addCurrent');
@@ -131,11 +132,11 @@ describe('integration/notate', () => {
       }
 
       function first(err) {
-        notate(err);
+        justNotate(err);
       }
 
       function second(err) {
-        notate(err);
+        justNotate(err);
       }
 
       first(err);
@@ -150,7 +151,7 @@ describe('integration/notate', () => {
 
     it('merges keys into error', () => {
       const err = new Error();
-      notate(err, null, { left: 1, right: 2 });
+      justNotate(err, { left: 1, right: 2 });
 
       expect(err).to.have.property('left', 1);
       expect(err).to.have.property('right', 2);
@@ -158,18 +159,20 @@ describe('integration/notate', () => {
 
     it('does not overwrite message', () => {
       const err = new Error('original message');
-      notate(err, null, { message: 'new message' });
+      justNotate(err, { message: 'new message' });
 
       expect(err).to.have.property('message', 'original message');
     });
 
     it('does just fine with no err', () => {
-      notate();
+      justNotate();
     });
+  });
 
+  describe('#notate (default)', () => {
     it('calls callback and returns true if err provided', () => {
       const cb = sinon.stub();
-      const actual = notate({}, cb);
+      const actual = notate(cb, new Error());
 
       expect(actual).to.equal(true);
       expect(cb).to.have.property('callCount', 1);
@@ -177,10 +180,22 @@ describe('integration/notate', () => {
 
     it('does not call callback and returns false if err provided', () => {
       const cb = sinon.stub();
-      const actual = notate(null, cb);
+      const actual = notate(cb, null);
 
       expect(actual).to.equal(false);
       expect(cb).to.have.property('callCount', 0);
+    });
+
+    it('throws if cb is not a function', () => {
+      const cb = 5;
+
+      expect(() => {
+        notate(cb, null);
+      }).to.throw(Error)
+        .that.has.property(
+          'message',
+          'notate: provided first parameter cb was not a function'
+        );
     });
   });
 

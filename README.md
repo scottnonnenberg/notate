@@ -15,7 +15,7 @@ import notate from '@scottnonnenberg/notate';
 
 export function doAsync(url, cb) {
   someLib.go(url, function(err, result) {
-    if (notate(err, cb, { url }) {
+    if (notate(cb, err, { url }) {
       return;
     }
 
@@ -26,7 +26,7 @@ export function doAsync(url, cb) {
 
 What does this get you?
 
-1. Now you know you won't crash the first time your code hits that `return;` line.
+1. Now you know you won't crash the first time your code hits your error-handling code, due to a mis-typed `return cb(err);`. That `return;` statement is simple and easy to get right.
 2. Later, when that error bubbles up to your top level, you'll have an entry in the callstack for this function, added by `notate()`. The `url` property will also be added to the error to aid debugging.
 
 You can use `notate`'s `prettyPrint()` function to get the full benefit:
@@ -45,6 +45,21 @@ doAsync('http://somewhere.com', function(err, result) {
   console.log(result);
 })
 ```
+
+## API
+
+```javascript
+var notate = require('@scottnonnenberg/notate');
+var justNotate = notate.justNotate;
+var prettyPrint = notate.prettyPrint;
+
+// or:
+import { default as notate, justNotate, prettyPrint } from '@scottnonnenberg/notate';
+```
+
+* `notate(cb, err, data, level)` (default) - give it your callback, potential error, and any data you'd like merged into the error for later debugging. Throws if `cb` is not a function. `level` can be used to capture a different callstack entry other than the immediate caller of this function.
+* `justNotate(err, data, level)` - just like `notate()` but without the `cb` parameter
+* `prettyPrint(err)` - takes an `Error` which has additional stack entries and additional data added to it and prints it to a string. Note that, for some browsers, we need to use a new `alternateStack` key to store the annotated stack. `prettyPrint()` will handle this properly.
 
 ## License
 

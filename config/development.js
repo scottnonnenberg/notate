@@ -43,7 +43,7 @@ var platforms = [
   // The pain!
   // ['Windows 2012', 'internet explorer', '10'], // works
   // ['Windows 2008', 'internet explorer', '9'], // doesn't report results
-  // ['Windows 2003', 'internet explorer', '8'] // doesn't report results
+  // ['Windows 2003', 'internet explorer', '8'], // doesn't report results
 ];
 
 module.exports = {
