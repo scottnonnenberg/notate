@@ -113,10 +113,12 @@ export function prettyPrint(err, providedOptions) {
     return inspect(err);
   }
 
-  // More special-casing for IE - util.inspect checks for message and description in keys,
-  //   if found, switches to a basic err.toString() call, and we lose all extra data added
-  //   to the error for debuggability.
+  let result;
+
   try {
+    // More special-casing for IE - util.inspect checks for message and description in
+    //   keys, if found, switches to a basic err.toString() call, and we lose all extra
+    //   data added to the error for debuggability.
     if (propertyIsEnumerable.call(err, 'message')) {
       defineProperty(err, 'message', {
         enumerable: false,
@@ -128,15 +130,16 @@ export function prettyPrint(err, providedOptions) {
       err._description = err.description;
       delete err.description;
     }
+    // ...end IE weirdness
+
+    result = inspect(err, { depth: 5 });
+
+    if (!err.log || err.log === 'warn' || err.log === 'error') {
+      result += `\n${_prepareStack(err, providedOptions)}`;
+    }
   }
   catch (e) {
     // do nothing
-  }
-
-  let result = inspect(err, { depth: 5 });
-
-  if (!err.log || err.log === 'warn' || err.log === 'error') {
-    result += `\n${_prepareStack(err, providedOptions)}`;
   }
 
   return result;
