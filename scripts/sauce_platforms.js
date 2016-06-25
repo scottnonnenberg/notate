@@ -32,8 +32,8 @@ function displayPlatforms(platforms) {
     )
     .orderBy(['api_name', 'short_version', 'os'], ['asc', 'desc', 'asc'])
     .map(platform => oneLine`
-      ['${platform.os}', '${platform.api_name}', '${platform.short_version}']
-      (${platform.long_name}, ${platform.long_version})
+      ['${platform.os}', '${platform.api_name}', '${platform.short_version}'],
+      // (${platform.long_name}, ${platform.long_version})
     `)
     .value();
 
@@ -52,7 +52,7 @@ if (command === 'get') {
       return;
     }
 
-    fs.writeFileSync(file, JSON.stringify(platforms));
+    fs.writeFileSync(file, JSON.stringify(platforms, null, '  '));
   });
 }
 else {
