@@ -30,7 +30,7 @@ module.exports = {
         path.resolve(__dirname, 'src'),
         path.resolve(__dirname, 'test'),
       ],
-      loader: 'babel-loader',
+      loaders: ['es3ify', 'babel-loader'],
     }],
 
     // sinon uses require() strangely: https://github.com/webpack/webpack/issues/304
