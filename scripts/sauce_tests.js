@@ -59,6 +59,10 @@ function startTests(options, cb) {
 }
 
 function delayRecurse(fn, pollTimeout, args) {
+  if (stop) {
+    return;
+  }
+
   const array = Array.prototype.slice.call(args, 0);
   setTimeout(() => fn(...array), pollTimeout);
 }
@@ -81,11 +85,14 @@ function pollForTestCompletion(jobs, options, cb) {
         return delayRecurse(pollForTestCompletion, pollTimeout, args);
       }
 
-      const result = res.body;
       const jobDetails = res.body['js tests'];
+      const progress = processProgress(jobDetails);
 
-      if (!result.completed) {
-        processProgress(jobDetails);
+      console.log(progress);
+
+      if (progress['test session in progress']
+       || progress['test queued']
+       || progress['test new']) {
         return delayRecurse(pollForTestCompletion, pollTimeout, args);
       }
 
@@ -112,7 +119,7 @@ function processProgress(results) {
     return result.status || (isFailure(result) ? 'failed' : 'succeeded');
   });
 
-  console.log(summary);
+  return summary;
 }
 
 function processResults(results) {
@@ -137,6 +144,8 @@ function shutdown(err) {
     console.error(err.stack);
   }
 
+  stop = true;
+
   waitForCompletion(server, () => {
     waitForCompletion(tunnel, () => {
       process.exitCode = testReturnCode;
@@ -144,11 +153,11 @@ function shutdown(err) {
   });
 }
 
-
 const options = config.get('sauce');
 const server = startServer(options.serverOptions);
 const tunnel = startTunnel(options.tunnelOptions);
 let testReturnCode = 1;
+let stop = false;
 
 setTimeout(() => {
   startTests(options, (err, jobs) => {
