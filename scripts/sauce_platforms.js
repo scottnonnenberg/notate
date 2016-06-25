@@ -27,13 +27,13 @@ function getPlatforms(options, cb) {
 function displayPlatforms(platforms) {
   // eliminate any weird dev/beta versions
   const clean = _.chain(platforms)
-    .reject(platforms, platform =>
+    .reject(platform =>
       isNaN(platform.short_version = parseFloat(platform.short_version))
     )
-    .orderBy(platforms, ['api_name', 'short_version', 'os'], ['asc', 'desc', 'asc'])
-    .map(platforms, platform => oneLine`
+    .orderBy(['api_name', 'short_version', 'os'], ['asc', 'desc', 'asc'])
+    .map(platform => oneLine`
       ['${platform.os}', '${platform.api_name}', '${platform.short_version}']
-      (${platform.long_name}, ${platform.long_version}
+      (${platform.long_name}, ${platform.long_version})
     `)
     .value();
 
