@@ -37,19 +37,19 @@ describe('integration/notate', () => {
 
       const error = makeError();
 
-      if (typeof console === 'undefined' || console || console.log) {
+      if (typeof console !== 'undefined' && console && console.log) {
         console.log('plain error.stack:');
         console.log(error.alternateStack || error.stack);
       }
 
       annotateError(error);
-      if (typeof console === 'undefined' || console || console.log) {
+      if (typeof console !== 'undefined' && console && console.log) {
         console.log('annotated error.stack:');
         console.log(error.alternateStack || error.stack);
       }
 
       const pretty = prettyPrint(error);
-      if (typeof console === 'undefined' || console || console.log) {
+      if (typeof console !== 'undefined' && console && console.log) {
         console.log('pretty error:');
         console.log(pretty);
       }

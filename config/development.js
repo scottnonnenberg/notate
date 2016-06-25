@@ -32,6 +32,7 @@ var platforms = [
 
   // IE 11 - 5.58%
   ['Windows 10', 'internet explorer', '11'],
+  ['Windows 2012', 'internet explorer', '10'],
 
   // Safari
   ['Mac 10.11', 'safari', '9'], // 1.56%
@@ -41,9 +42,8 @@ var platforms = [
   ['Windows 10', 'microsoftedge', '13'], // 0.99%
 
   // The pain!
-  // ['Windows 2012', 'internet explorer', '10'], // works
-  // ['Windows 2008', 'internet explorer', '9'], // doesn't report results
-  // ['Windows 2003', 'internet explorer', '8'], // doesn't report results
+  // ['Windows 2008', 'internet explorer', '9'], // no stacktraces!
+  // ['Windows 2003', 'internet explorer', '8'], // no stacktraces, defineProperty broken!
 ];
 
 module.exports = {

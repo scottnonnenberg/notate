@@ -106,16 +106,16 @@ You can prevent the stack from being printed by setting `err.log` to something o
 than 'warn' or 'error'.
 */
 export function prettyPrint(err, providedOptions) {
-  if (!err) {
-    return '';
-  }
-  if (!_isError(err)) {
-    return inspect(err);
-  }
-
-  let result;
+  let result = '';
 
   try {
+    if (!err) {
+      return result;
+    }
+    if (!_isError(err)) {
+      return inspect(err);
+    }
+
     // More special-casing for IE - util.inspect checks for message and description in
     //   keys, if found, switches to a basic err.toString() call, and we lose all extra
     //   data added to the error for debuggability.

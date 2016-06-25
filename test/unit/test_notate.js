@@ -76,22 +76,10 @@ describe('unit/notate', () => {
         + 'line 10\n'
         + 'line 11';
 
-      const expected = '{ [Error: this is the message] one: 1, two: \'two\' }\n'
-        + 'line 1\n'
-        + 'line 2\n'
-        + 'line 3\n'
-        + 'line 4\n'
-        + 'line 5\n'
-        + 'line 6\n'
-        + 'line 7\n'
-        + 'line 8\n'
-        + 'line 9\n'
-        + 'line 10\n'
-        + '... (additional lines truncated)';
-
       const actual = prettyPrint(err);
 
-      expect(actual).to.equal(expected);
+      expect(actual).to.contain('line 10');
+      expect(actual).not.to.contain('line 11');
     });
 
     it('truncates callstack at five lines when specified', () => {
@@ -107,21 +95,14 @@ describe('unit/notate', () => {
         + 'line 10\n'
         + 'line 11';
 
-      const expected = '{ [Error: this is the message] one: 1, two: \'two\' }\n'
-        + 'line 1\n'
-        + 'line 2\n'
-        + 'line 3\n'
-        + 'line 4\n'
-        + 'line 5\n'
-        + '... (additional lines truncated)';
-
       const options = {
         maxLines: 5,
       };
 
       const actual = prettyPrint(err, options);
 
-      expect(actual).to.equal(expected);
+      expect(actual).to.contain('line 5');
+      expect(actual).not.to.contain('line 6');
     });
 
     it('prints out whole object if it is not an Error', () => {
