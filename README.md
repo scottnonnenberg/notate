@@ -46,6 +46,15 @@ doAsync('http://somewhere.com', function(err, result) {
 })
 ```
 
+And it will look like this on Node.js - see [this page for browser examples](examples.md)):
+
+```
+{ [Error: Incorrect arguments supplied] url: ‘http://something’ }
+    at **breadcrumb: /src/demos/4. Error from async call/b. with breadcrumbs.js:82:21
+    at null._onTimeout (/src/demos/4. Error from async call/b. with breadcrumbs.js:13:17)
+    at Timer.listOnTimeout (timers.js:92:15)
+```
+
 ## API
 
 ```javascript
@@ -61,6 +70,50 @@ import { default as notate, justNotate, prettyPrint } from '@scottnonnenberg/not
 * `justNotate(err, data, level)` - just like `notate()` but without the `cb` parameter
 * `prettyPrint(err, options)` - takes an `Error` which has additional stack entries and additional data added to it and prints it to a string. Note that, for some browsers, we need to use a new `alternateStack` key to store the annotated stack. `prettyPrint()` will handle this properly. `options` takes these keys:
   * `maxLines`: maximum number of callstack lines to include (default: 10)
+
+## In-browser use
+
+First, there's difficulty with minified code. The line numbers and function names won't mean much. However, the data you add to the error will still be present on the outputs of `prettyPrint()`, so I think it's worthwhile.
+
+In development mode, you'll get an experience similar to the Node.js experience, except modern module loaders will put everything in one file. Naming your functions will really help here.
+
+You can see what stacks look like on various browsers on the [stack examples page](examples.md).
+
+Now, some notes on specific browsers:
+
+### Internet Explorer 10/11
+
+Everything will work as you expect, except for one thing: your `Error` objects will not have a callstack until you `throw` them. This library will annotate these stack-less `Error` objects, but you'll start from nothing.
+
+To get the callstack when you create a new `Error`:
+
+```javascript
+var err = new Error('something went wrong');
+if (!err.stack) {
+  try {
+    throw err;
+  }
+  catch (e) {
+    err = e;
+  }
+}
+```
+
+Total pain, yes. [Edge](https://www.microsoft.com/en-us/windows/microsoft-edge) doesn't have this problem.
+
+### Internet Explorer 9 and Safari 5
+
+Sadly, these browsers don't give you stacktraces at all. So library is pretty useless. Yes, you can use libraries like [StackTrace.js](https://www.stacktracejs.com/), but I'm not willing to go that far. Maybe if you ask really nice. But you should probably just fork this project to support those scenarios.
+
+Do be aware that this project's Babel-produced code won't even load in IE9 without some modifications to the use of certain keywords. The [`es3ify`](https://github.com/spicyj/es3ify) node module and its [Webpack loader](https://github.com/sorrycc/es3ify-loader) will be ncessary.
+
+Additionally, when working with these browsers I would recommend that you force IE into standards mode: http://stackoverflow.com/questions/10975107/forcing-internet-explorer-9-to-use-standards-document-mode
+
+### Internet Explorer 8 and below
+
+Like IE9, old versions of IE won't provide callstacks. But you will find that modern Javascript techniques will cause parse and execute problems on these old browsers.
+
+Thus, I used the babel plugin `es2015-loose` so basic modules don't use `Object.defineProperty()` to give proper ES2015 module semantics: http://www.2ality.com/2015/12/babel6-loose-mode.html In older browsers, `Object.defineProperty()` only works for DOM nodes. We didn't really need those semantics, right? :0)
 
 ## License
 
