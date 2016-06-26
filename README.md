@@ -103,9 +103,9 @@ Total pain, yes. [Edge](https://www.microsoft.com/en-us/windows/microsoft-edge) 
 
 ### Internet Explorer 9 and Safari 5
 
-Sadly, these browsers don't give you stacktraces at all. So library is pretty useless. Yes, you can use libraries like [StackTrace.js](https://www.stacktracejs.com/), but I'm not willing to go that far. Maybe if you ask really nice. But you should probably just fork this project to support those scenarios.
+Sadly, these browsers don't give you stacktraces at all. So you're really down to the data you merge into the errors. Yes, you can use libraries like [StackTrace.js](https://www.stacktracejs.com/), but I'm not willing to go that far. Maybe if you ask really nice. But you should probably just fork this project to support those scenarios.
 
-Do be aware that this project's Babel-produced code won't even load in IE9 without some modifications to the use of certain keywords. The [`es3ify`](https://github.com/spicyj/es3ify) node module and its [Webpack loader](https://github.com/sorrycc/es3ify-loader) will be ncessary.
+Do be aware that this project's Babel-produced code won't even load in IE9 without some modifications to the use of certain keywords. The [`es3ify`](https://github.com/spicyj/es3ify) node module and its [Webpack loader](https://github.com/sorrycc/es3ify-loader) will be necessary.
 
 Additionally, when working with these browsers I would recommend that you force IE into standards mode: http://stackoverflow.com/questions/10975107/forcing-internet-explorer-9-to-use-standards-document-mode
 
