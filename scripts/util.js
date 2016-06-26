@@ -22,5 +22,5 @@ export function waitForCompletion(child, cb) {
   }
 
   child.kill();
-  child.on('close', () => cb());
+  child.on('close', cb);
 }

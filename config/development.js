@@ -67,7 +67,7 @@ module.exports = {
 
     serverOptions: {
       command: 'npm',
-      args: ['run', 'serve', '--', '8001'],
+      args: ['run', 'serve'],
     },
   },
 };
