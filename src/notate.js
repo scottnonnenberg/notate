@@ -134,6 +134,15 @@ export function prettyPrint(err, providedOptions) {
 
     result = inspect(err, { depth: 5 });
 
+    // Normalize new Node v6 util.inspect() behavior
+      // v4: https://github.com/nodejs/node/blob/2ce83bd8f91dec603740cce216259f3f3ac1b364/lib/util.js#L458-L460
+      // v6: https://github.com/nodejs/node/blob/ee8e7cd25d232a115ff4b1b5f5dd91ca442bacae/lib/util.js#L629-L631
+    const withKeys = /^\{ \[/;
+    const plain = /^\[/;
+    if (!withKeys.test(result) && !plain.test(result)) {
+      result = result.replace(err.stack, `[${Error.prototype.toString.call(err)}]`);
+    }
+
     if (!err.log || err.log === 'warn' || err.log === 'error') {
       result += `\n${_prepareStack(err, providedOptions)}`;
     }
