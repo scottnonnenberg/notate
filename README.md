@@ -50,7 +50,7 @@ And it will look like this on Node.js - see [this page for browser examples](exa
 
 ```
 { [Error: Incorrect arguments supplied] url: ‘http://something’ }
-    at **breadcrumb: /src/demos/4. Error from async call/b. with breadcrumbs.js:82:21
+    at **notate: /src/demos/4. Error from async call/b. with breadcrumbs.js:82:21
     at null._onTimeout (/src/demos/4. Error from async call/b. with breadcrumbs.js:13:17)
     at Timer.listOnTimeout (timers.js:92:15)
 ```

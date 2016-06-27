@@ -18,7 +18,7 @@ Error: user attempted something!
 
 annotated error.stack:
 Error: user attempted something!
-    at **breadcrumb: annotateError (test_notate.js:35:9)
+    at **notate: annotateError (test_notate.js:35:9)
     at makeError (test_notate.js:19:21)
     at Context.<anonymous> (test_notate.js:38:21)
     at callFn (/path/to/project/node_modules/mocha/lib/runnable.js:286:21)
@@ -34,7 +34,7 @@ Error: user attempted something!
 
 pretty error:
 { [Error: user attempted something!] user: 'username' }
-    at **breadcrumb: annotateError (test_notate.js:35:9)
+    at **notate: annotateError (test_notate.js:35:9)
     at makeError (test_notate.js:19:21)
     at Context.<anonymous> (test_notate.js:38:21)
     at callFn (/node_modules/mocha/lib/runnable.js:286:21)
@@ -66,7 +66,7 @@ Error: user attempted something!
 
 annotated error.stack:
 Error: user attempted something!
-    at **breadcrumb: annotateError (test_notate.js:35:9)
+    at **notate: annotateError (test_notate.js:35:9)
     at makeError (test_notate.js:19:21)
     at Context.<anonymous> (test_notate.js:38:21)
     at callFn (/path/to/project/node_modules/mocha/lib/runnable.js:286:21)
@@ -81,7 +81,7 @@ Error: user attempted something!
 
 pretty error:
 { [Error: user attempted something!] user: 'username' }
-    at **breadcrumb: annotateError (test_notate.js:35:9)
+    at **notate: annotateError (test_notate.js:35:9)
     at makeError (test_notate.js:19:21)
     at Context.<anonymous> (test_notate.js:38:21)
     at callFn (/node_modules/mocha/lib/runnable.js:286:21)
@@ -112,7 +112,7 @@ Error: user attempted something!
 
 annotated error.stack:
 Error: user attempted something!
-    at **breadcrumb: annotateError (test_notate.js:37)
+    at **notate: annotateError (test_notate.js:37)
     at makeError (test_notate.js:22)
     at Context.<anonymous> (test_notate.js:40)
     at callFn (mocha.js:4202)
@@ -126,7 +126,7 @@ Error: user attempted something!
 
 pretty error:
 { [Error: user attempted something!] user: 'username' }
-    at **breadcrumb: annotateError (http://localhost:8001/dist/client/test/all.js:9781:33)
+    at **notate: annotateError (http://localhost:8001/dist/client/test/all.js:9781:33)
     at makeError (http://localhost:8001/dist/client/test/all.js:9766:22)
     at Context.<anonymous> (http://localhost:8001/dist/client/test/all.js:9784:20)
     at callFn (http://localhost:8001/node_modules/mocha/mocha.js:4202:21)
@@ -156,7 +156,7 @@ next@http://localhost:8001/node_modules/mocha/mocha.js:4523:1
 timeslice@http://localhost:8001/node_modules/mocha/mocha.js:12326:5
 
 annotated error.stack:
-**breadcrumb: annotateError@http://localhost:8001/dist/client/test/all.js:9781:11
+**notate: annotateError@http://localhost:8001/dist/client/test/all.js:9781:11
 makeError@http://localhost:8001/dist/client/test/all.js:9766:22
 @http://localhost:8001/dist/client/test/all.js:9784:20
 callFn@http://localhost:8001/node_modules/mocha/mocha.js:4202:18
@@ -171,7 +171,7 @@ timeslice@http://localhost:8001/node_modules/mocha/mocha.js:12326:5
 
 pretty error:
 { [Error: user attempted something!] user: 'username' }
-**breadcrumb: annotateError@http://localhost:8001/dist/client/test/all.js:9781:11
+**notate: annotateError@http://localhost:8001/dist/client/test/all.js:9781:11
 makeError@http://localhost:8001/dist/client/test/all.js:9766:22
 @http://localhost:8001/dist/client/test/all.js:9784:20
 callFn@http://localhost:8001/node_modules/mocha/mocha.js:4202:18
@@ -201,7 +201,7 @@ http://localhost:8001/node_modules/mocha/mocha.js:4559:9
 timeslice@http://localhost:8001/node_modules/mocha/mocha.js:12326:27
 
 annotated error.stack:
-**breadcrumb: annotateError@http://localhost:8001/dist/client/test/all.js:9781:33
+**notate: annotateError@http://localhost:8001/dist/client/test/all.js:9781:33
 makeError@http://localhost:8001/dist/client/test/all.js:9766:31
 http://localhost:8001/dist/client/test/all.js:9784:29
 callFn@http://localhost:8001/node_modules/mocha/mocha.js:4202:25
@@ -220,7 +220,7 @@ pretty error:
   column: 31,
   sourceURL: 'http://localhost:8001/dist/client/test/all.js',
   user: 'username' }
-**breadcrumb: annotateError@http://localhost:8001/dist/client/test/all.js:9781:33
+**notate: annotateError@http://localhost:8001/dist/client/test/all.js:9781:33
 makeError@http://localhost:8001/dist/client/test/all.js:9766:31
 http://localhost:8001/dist/client/test/all.js:9784:29
 callFn@http://localhost:8001/node_modules/mocha/mocha.js:4202:25
@@ -254,7 +254,7 @@ Error: user attempted something!
 
 annotated error.stack:
 Error: user attempted something!
-    at **breadcrumb: annotateError (http://localhost:8001/dist/client/test/all.js:9783)
+    at **notate: annotateError (http://localhost:8001/dist/client/test/all.js:9783)
     at makeError (http://localhost:8001/dist/client/test/all.js:9773)
     at http://localhost:8001/dist/client/test/all.js:9786
     at callFn (http://localhost:8001/node_modules/mocha/mocha.js:4202)
@@ -302,7 +302,7 @@ pretty error:
        sourceURL: 'http://localhost:8001/node_modules/mocha/mocha.js',
        line: 12326 } ],
   user: 'username' }
-    at **breadcrumb: annotateError (http://localhost:8001/dist/client/test/all.js:9783)
+    at **notate: annotateError (http://localhost:8001/dist/client/test/all.js:9783)
     at makeError (http://localhost:8001/dist/client/test/all.js:9773)
     at http://localhost:8001/dist/client/test/all.js:9786
     at callFn (http://localhost:8001/node_modules/mocha/mocha.js:4202)
@@ -333,7 +333,7 @@ Error: user attempted something!
 
 annotated error.stack:
 Error: user attempted something!
-   at **breadcrumb: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
+   at **notate: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
    at makeError (http://localhost:8001/dist/client/test/all.js:9766:10)
    at Anonymous function (http://localhost:8001/dist/client/test/all.js:9784:8)
    at callFn (http://localhost:8001/node_modules/mocha/mocha.js:4202:5)
@@ -347,7 +347,7 @@ Error: user attempted something!
 
 pretty error:
 { [Error: user attempted something!] user: 'username', _description: 'user attempted something!' }
-   at **breadcrumb: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
+   at **notate: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
    at makeError (http://localhost:8001/dist/client/test/all.js:9766:10)
    at Anonymous function (http://localhost:8001/dist/client/test/all.js:9784:8)
    at callFn (http://localhost:8001/node_modules/mocha/mocha.js:4202:5)
@@ -378,7 +378,7 @@ Error: user attempted something!
 
 annotated error.stack:
 Error: user attempted something!
-   at **breadcrumb: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
+   at **notate: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
    at makeError (http://localhost:8001/dist/client/test/all.js:9771:14)
    at Anonymous function (http://localhost:8001/dist/client/test/all.js:9784:8)
    at callFn (http://localhost:8001/node_modules/mocha/mocha.js:4202:5)
@@ -392,7 +392,7 @@ Error: user attempted something!
 
 pretty error:
 { [Error: user attempted something!] user: 'username', _description: 'user attempted something!' }
-   at **breadcrumb: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
+   at **notate: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
    at makeError (http://localhost:8001/dist/client/test/all.js:9771:14)
    at Anonymous function (http://localhost:8001/dist/client/test/all.js:9784:8)
    at callFn (http://localhost:8001/node_modules/mocha/mocha.js:4202:5)
@@ -423,7 +423,7 @@ Error: user attempted something!
 
 annotated error.stack:
 Error: user attempted something!
-  at **breadcrumb: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
+  at **notate: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
   at makeError (http://localhost:8001/dist/client/test/all.js:9771:14)
   at Anonymous function (http://localhost:8001/dist/client/test/all.js:9784:8)
   at callFn (http://localhost:8001/node_modules/mocha/mocha.js:4202:5)
@@ -437,7 +437,7 @@ Error: user attempted something!
 
 pretty error:
 { [Error: user attempted something!] user: 'username', _description: 'user attempted something!' }
-  at **breadcrumb: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
+  at **notate: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
   at makeError (http://localhost:8001/dist/client/test/all.js:9771:14)
   at Anonymous function (http://localhost:8001/dist/client/test/all.js:9784:8)
   at callFn (http://localhost:8001/node_modules/mocha/mocha.js:4202:5)

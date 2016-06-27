@@ -165,7 +165,7 @@ const defineProperty = Object.defineProperty;
 
 export const _internals = {
   at: 'at ',
-  prefix: '**breadcrumb: ',
+  prefix: '**notate: ',
   layerSize: 1,
   truncation: '... (additional lines truncated)',
 };

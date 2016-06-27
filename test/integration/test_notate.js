@@ -86,9 +86,9 @@ describe('integration/notate', () => {
 
       const lines = stack.split('\n');
       const firstLine = lines[0] === 'Error: something' ? 1 : 0;
-      expect(lines[firstLine]).to.contain('**breadcrumb:');
+      expect(lines[firstLine]).to.contain('**notate:');
       expect(lines[firstLine]).to.contain('addCurrent');
-      expect(lines[firstLine + 1]).not.to.contain('**breadcrumb:');
+      expect(lines[firstLine + 1]).not.to.contain('**notate:');
       expect(lines[firstLine + 1]).to.contain('addCurrent');
     });
 
@@ -112,9 +112,9 @@ describe('integration/notate', () => {
 
       const lines = stack.split('\n');
       const firstLine = lines[0] === 'Error' || lines[0] === 'Error: ' ? 1 : 0;
-      expect(lines[firstLine]).to.contain('**breadcrumb:');
+      expect(lines[firstLine]).to.contain('**notate:');
       expect(lines[firstLine]).to.contain('addCurrent');
-      expect(lines[firstLine + 1]).not.to.contain('**breadcrumb:');
+      expect(lines[firstLine + 1]).not.to.contain('**notate:');
       expect(lines[firstLine + 1]).to.contain('addCurrent');
     });
 

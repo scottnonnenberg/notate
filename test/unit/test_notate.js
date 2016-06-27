@@ -379,7 +379,7 @@ describe('unit/notate', () => {
 
     it('prefers alternateStack if it exists on object', () => {
       const err = {
-        alternateStack: '  **breadcrumb: blah',
+        alternateStack: '  **notate: blah',
         stack: '  at second line\n'
           + '  at third line',
       };
@@ -405,21 +405,21 @@ describe('unit/notate', () => {
       const lines = ['   at blah'];
       const actual = _getFirstLine(lines);
 
-      expect(actual).to.equal('**breadcrumb: blah');
+      expect(actual).to.equal('**notate: blah');
     });
 
     it('handles a no "at" breadcrumb', () => {
       const lines = ['blah'];
       const actual = _getFirstLine(lines);
 
-      expect(actual).to.equal('**breadcrumb: blah');
+      expect(actual).to.equal('**notate: blah');
     });
 
     it('empty returned if no stacktrace', () => {
       const lines = [];
       const actual = _getFirstLine(lines);
 
-      expect(actual).to.equal('**breadcrumb: <empty>');
+      expect(actual).to.equal('**notate: <empty>');
     });
   });
 
