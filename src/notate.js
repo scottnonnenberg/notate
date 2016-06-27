@@ -161,7 +161,7 @@ const MAX_LINES = 10;
 const propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
 const getDescriptor = Object.getOwnPropertyDescriptor;
 const defineProperty = Object.defineProperty;
-
+const toString = Object.prototype.toString;
 
 export const _internals = {
   at: 'at ',
@@ -174,7 +174,7 @@ export function _isFunction(fn) {
   if (!fn) {
     return false;
   }
-  if (typeof fn !== 'function') {
+  if (toString.call(fn) !== '[object Function]') {
     return false;
   }
 

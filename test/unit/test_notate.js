@@ -182,10 +182,10 @@ describe('unit/notate', () => {
     });
 
     it('returns false for other types', () => {
-      expect(_isFunction(/regex/)).to.equal(false);
-      expect(_isFunction('string')).to.equal(false);
-      expect(_isFunction(5)).to.equal(false);
-      expect(_isFunction(new Date())).to.equal(false);
+      expect(_isFunction(/regex/)).to.equal(false, 'regex');
+      expect(_isFunction('string')).to.equal(false, 'string');
+      expect(_isFunction(5)).to.equal(false, 'number');
+      expect(_isFunction(new Date())).to.equal(false, 'date');
     });
 
     it('returns true if it is a function', () => {
