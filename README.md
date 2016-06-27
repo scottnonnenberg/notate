@@ -27,7 +27,7 @@ export function doAsync(url, cb) {
 What does this get you?
 
 1. Now you know you won't crash the first time your code hits your error-handling code, due to a mis-typed `return cb(err);`. That `return;` statement is simple and easy to get right.
-2. Later, when that error bubbles up to your top level, you'll have an entry in the callstack for this function, added by `notate()`. The `url` property will also be added to the error to aid debugging.
+2. Later, when that error bubbles up to your top level, you'll have an entry in the callstack for this function, added by `notate()`. The `url` property will also be added to the error to aid debugging. _Note: if an `url` property already exists on the `Error`, it will be come `url2`._
 
 You can use `notate`'s `prettyPrint()` function to get the full benefit:
 
