@@ -6,3 +6,4 @@ module.exports = notate;
 
 notate.justNotate = justNotate;
 notate.prettyPrint = prettyPrint;
+notate.notate = notate;
