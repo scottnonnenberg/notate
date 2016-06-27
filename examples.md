@@ -375,8 +375,8 @@ Error: user attempted something!
    at Anonymous function (http://localhost:8001/node_modules/mocha/mocha.js:4591:7)
    at next (http://localhost:8001/node_modules/mocha/mocha.js:4523:7)
    at Anonymous function (http://localhost:8001/node_modules/mocha/mocha.js:4559:5)
-annotated error.stack:
 
+annotated error.stack:
 Error: user attempted something!
    at **breadcrumb: annotateError (http://localhost:8001/dist/client/test/all.js:9781:11)
    at makeError (http://localhost:8001/dist/client/test/all.js:9771:14)
