@@ -46,7 +46,7 @@ doAsync('http://somewhere.com', function(err, result) {
 })
 ```
 
-And it will look like this on Node.js - see [this page for browser examples](examples.md)):
+And it will look like this on Node.js - see [this page for browser examples](https://github.com/scottnonnenberg/notate/blob/master/examples.md)):
 
 ```
 { [Error: Incorrect arguments supplied] url: ‘http://something’ }
@@ -77,9 +77,15 @@ First, there's difficulty with minified code. The line numbers and function name
 
 In development mode, you'll get an experience similar to the Node.js experience, except modern module loaders will put everything in one file. Naming your functions will really help here.
 
-You can see what stacks look like on various browsers on the [stack examples page](examples.md).
+You can see what stacks look like on various browsers on the [stack examples page](https://github.com/scottnonnenberg/notate/blob/master/examples.md).
 
 Now, some notes on specific browsers:
+
+### PhantomJS
+
+Sadly, the output on this platform you frequently use for testing [is quite ugly](https://github.com/scottnonnenberg/notate/blob/master/examples.md#phantomjs). Its `stack` and `stackArray` fields are both large and [`enumerable`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Enumerability_and_ownership_of_properties), and are therefore included in the `util.inspect()` component of the `prettyPrint()`.
+
+But there's an additional weirdness with this browser - the `stack` property of `Error` objects neither `writable` nor `configurable` we can't annotate it! Thus, this library creates a second field to be annotated and then used in the `prettyPrint()`: `err.alternateStack`. It is `writable` and `configurable`, but not `enumerable`.
 
 ### Internet Explorer 10/11
 
