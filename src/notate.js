@@ -95,7 +95,7 @@ export function justNotate(err, data, providedDepth) {
 
 
 /*
-`prettyPrint()  ` prints out errors. Now that you're using `breadcrumbs.add()` to annotate
+`prettyPrint()` prints out errors. Now that you're using `notate()` to annotate
 your errors as they propagate through your system, it's time to print them out properly.
 
 First we do a `util.inspect()` of the error, grabbing all of those keys we've merged
