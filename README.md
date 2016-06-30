@@ -2,6 +2,8 @@
 
 Making it easier to debug asynchronous errors in javascript. Better than `if (err) { return cb(err) }`
 
+Blog post announcing this project: https://blog.scottnonnenberg.com/notate-better-javascript-callstacks/
+
 ## Quickstart
 
 ```bash
