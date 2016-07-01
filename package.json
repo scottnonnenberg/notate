@@ -10,7 +10,6 @@
     "precommit": "npm run clean && npm run lint && npm run build-client && npm run test",
     "prepublish": "npm run clean && npm run build-server && npm run build-client-production",
     "test": "npm run test-client-cli-all && npm run test-server-all",
-    "start": "npm run serve",
     "serve": "python -m SimpleHTTPServer 8001",
     "build-server": "babel src --out-dir dist/server",
     "build-client": "webpack",

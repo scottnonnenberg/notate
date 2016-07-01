@@ -5,7 +5,7 @@ const STARTUP_DELAY = 500;
 
 
 function startServer() {
-  const server = startProcess('npm', ['start']);
+  const server = startProcess('npm', ['run', 'serve']);
 
   server.on('close', code => console.log(`cli-client: server exited with code ${code}`));
 
