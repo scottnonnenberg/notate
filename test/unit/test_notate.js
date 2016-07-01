@@ -108,7 +108,6 @@ describe('unit/notate', () => {
     it('prints out whole object if it is not an Error', () => {
       err = {
         message: 'this is the message',
-        stack: 'overridden stack',
         one: 1,
         two: 'two',
       };
@@ -116,7 +115,6 @@ describe('unit/notate', () => {
       const actual = prettyPrint(err);
 
       expect(actual).to.contain('message:');
-      expect(actual).to.contain('stack:');
       expect(actual).to.contain('one:');
       expect(actual).to.contain('two:');
     });
@@ -164,6 +162,19 @@ describe('unit/notate', () => {
         return;
       }
       expect(match).to.have.property('length').that.is.below(2);
+    });
+
+    it('includes stack added to non-Error', function nonError() {
+      function doStuff() {
+        // noop!
+      }
+
+      justNotate(doStuff, { item: 5 });
+      const actual = prettyPrint(doStuff);
+
+      expect(actual).to.contain('nonError');
+      expect(actual).to.contain('item: 5');
+      expect(actual).to.contain('doStuff');
     });
   });
 

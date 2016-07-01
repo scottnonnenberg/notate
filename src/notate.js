@@ -112,7 +112,7 @@ export function prettyPrint(err, providedOptions) {
     if (!err) {
       return result;
     }
-    if (!_isError(err)) {
+    if (!_isError(err) && !err.stack) {
       return inspect(err);
     }
 
