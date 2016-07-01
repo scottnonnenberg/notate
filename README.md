@@ -123,6 +123,12 @@ Like IE9, old versions of IE won't provide callstacks. But you will find that mo
 
 Thus, I used the babel plugin `es2015-loose` so basic modules don't use `Object.defineProperty()` to give proper ES2015 module semantics: http://www.2ality.com/2015/12/babel6-loose-mode.html In older browsers, `Object.defineProperty()` only works for DOM nodes. We didn't really need those semantics, right? :0)
 
+## Contributing
+
+This project uses [`standard-version`](https://github.com/conventional-changelog/standard-version) to release new versions, automatically updating the version number and [changelog](https://github.com/scottnonnenberg/notate/blob/master/CHANGELOG.md) based on commit messages in [standard format](https://github.com/bcoe/conventional-changelog-standard/blob/master/convention.md). [`ghooks`](https://github.com/gtramontina/ghooks) and [`validate-commit-msg`](https://github.com/kentcdodds/validate-commit-msg) are used to ensure all commit messages match the expected format (see [package.json](https://github.com/scottnonnenberg/notate/blob/master/package.json) for the configuration details).
+
+It takes some getting used to, but this configuration is absolutely worthwhile. A changelog is way easier to understand than the chaos of a raw commit stream, especially with `standard-version` providing direct links to bugs, commits and [commit ranges](https://github.com/scottnonnenberg/notate/compare/v0.2.0...v1.0.0).
+
 ## License
 
 (The MIT license)
