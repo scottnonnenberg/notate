@@ -9,18 +9,18 @@ export function startProcess(command, args) {
 
   child.stdout.on('data', data => process.stdout.write(data.toString()));
   child.stderr.on('data', data => process.stderr.write(data.toString()));
-  child.on('close', () => {
-    child.closed = true;
+  child.on('exit', () => {
+    child.exit = true;
   });
 
   return child;
 }
 
 export function waitForCompletion(child, cb) {
-  if (child.closed) {
+  if (child.exit) {
     return cb();
   }
 
   child.kill();
-  child.on('close', cb);
+  child.on('exit', cb);
 }
