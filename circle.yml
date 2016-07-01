@@ -1,6 +1,6 @@
 dependencies:
   override:
-    - nvm use 6 && npm install
+    - nvm install 6 && nvm use 6 && npm install
 test:
   override:
     - nvm use 6 && npm test
