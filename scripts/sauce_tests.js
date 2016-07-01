@@ -5,29 +5,8 @@ import _ from 'lodash';
 import config from 'config';
 
 import info from '../package.json';
-import { startProcess, waitForCompletion } from './util';
-
 
 const HALF_SECOND = 500;
-
-function startServer(options) {
-  const { command, args } = options;
-  const server = startProcess(command, args);
-
-  server.on('close', code => console.log(`sauce-tests: server exited with code ${code}`));
-
-  return server;
-}
-
-function startTunnel(options) {
-  const { command, args } = options;
-  const tunnel = startProcess(command, args);
-
-  tunnel.on('close', code => console.log(`sauce-tests: tunnel exited with code ${code}`));
-
-  return tunnel;
-}
-
 
 function startTests(options, cb) {
   // https://wiki.saucelabs.com/display/DOCS/JavaScript+Unit+Testing+Methods
@@ -146,16 +125,10 @@ function shutdown(err) {
 
   stop = true;
 
-  waitForCompletion(server, () => {
-    waitForCompletion(tunnel, () => {
-      process.exitCode = testReturnCode;
-    });
-  });
+  process.exitCode = testReturnCode;
 }
 
 const options = config.get('sauce');
-const server = startServer(options.serverOptions);
-const tunnel = startTunnel(options.tunnelOptions);
 let testReturnCode = 1;
 let stop = false;
 
@@ -188,5 +161,3 @@ process.on('SIGINT', () => {
 });
 
 process.on('uncaughtException', err => shutdown(err));
-
-process.on('exit', () => console.log('sauce-tests: shutting down'));

@@ -47,6 +47,11 @@ var platforms = [
 ];
 
 module.exports = {
+  tunnel: {
+    command: null,
+    args: null,
+  },
+
   sauce: {
     username: null,
     key: null,
@@ -59,15 +64,5 @@ module.exports = {
 
     timeout: 20 * 1000,
     pollTimeout: 10 * 1000,
-
-    tunnelOptions: {
-      command: null,
-      args: null,
-    },
-
-    serverOptions: {
-      command: 'npm',
-      args: ['run', 'serve'],
-    },
   },
 };
