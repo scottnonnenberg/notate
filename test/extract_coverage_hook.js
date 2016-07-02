@@ -1,4 +1,5 @@
 /* eslint-disable no-var, import/no-commonjs */
+/* global window: true */
 
 var fs = require('fs');
 

@@ -9,5 +9,7 @@ module.exports = {
     'immutable/no-mutation': 'off',
 
     'import/no-commonjs': 'off',
+
+    'filenames/match-regex': 'off',
   },
 };

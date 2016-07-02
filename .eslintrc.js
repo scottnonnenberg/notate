@@ -9,12 +9,9 @@ module.exports = {
     },
   },
 
-  plugins: [
-    'thehelp',
-  ],
   extends: [
-    'thehelp/core',
-    'thehelp/es2015',
+    '@scottnonnenberg/thehelp/core',
+    '@scottnonnenberg/thehelp/es2015',
     // no functional because, at its core, this project is about modifying error objects!
   ],
 
@@ -24,5 +21,7 @@ module.exports = {
     'no-console': 'off',
 
     'security/detect-object-injection': 'off',
+
+    'filenames/match-regex': ['error', /^[a-z0-9_.]+$/],
   },
 };
