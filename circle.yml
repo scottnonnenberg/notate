@@ -1,8 +1,8 @@
 dependencies:
   override:
-    - nvm install 6 && nvm use 6 && npm install && npm run build-client
+    - nvm install 6 && nvm use 6 && npm install && npm run build-client-coverage
     # prepublish, run with install, only builds the production version of client files
 test:
   override:
-    - nvm use 6 && npm test
-    - nvm use 4 && npm test
+    - nvm use 6 && npm run ci
+    - nvm use 4 && npm run ci
