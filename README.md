@@ -4,7 +4,7 @@ Making it easier to debug asynchronous errors in javascript. Better than `if (er
 
 Blog post announcing this project: https://blog.scottnonnenberg.com/notate-better-javascript-callstacks/
 
-[![continous integration](https://img.shields.io/circleci/project/scottnonnenberg/notate/master.svg?maxAge=86400)](https://circleci.com/gh/scottnonnenberg/notate/tree/master) [![code coverage](https://img.shields.io/codecov/c/github/scottnonnenberg/notate/master.svg?maxAge=86400)](https://codecov.io/gh/scottnonnenberg/notate/branch/master) [![npm version](https://img.shields.io/npm/v/@scottnonnenberg/notate.svg?maxAge=86400)](https://www.npmjs.com/package/@scottnonnenberg/notate) [![license](https://img.shields.io/github/license/scottnonnenberg/notate.svg?maxAge=2592000)](https://github.com/scottnonnenberg/notate#license)
+[![continous integration](https://img.shields.io/circleci/project/scottnonnenberg/notate/master.svg?maxAge=3600)](https://circleci.com/gh/scottnonnenberg/notate/tree/master) [![code coverage](https://img.shields.io/codecov/c/github/scottnonnenberg/notate/master.svg?maxAge=3600)](https://codecov.io/gh/scottnonnenberg/notate/branch/master) [![npm version](https://img.shields.io/npm/v/@scottnonnenberg/notate.svg?maxAge=3600)](https://www.npmjs.com/package/@scottnonnenberg/notate) [![license](https://img.shields.io/github/license/scottnonnenberg/notate.svg?maxAge=2592000)](https://github.com/scottnonnenberg/notate#license)
 
 ## Quickstart
 
