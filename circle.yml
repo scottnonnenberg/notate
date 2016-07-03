@@ -4,5 +4,6 @@ dependencies:
     # prepublish, run with install, only builds the production version of client files
 test:
   override:
+    - nvm use 4 && npm run test-server-all
     - nvm use 6 && npm run ci
-    - nvm use 4 && npm run ci
+
