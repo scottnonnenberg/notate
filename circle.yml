@@ -1,9 +1,16 @@
 dependencies:
+  pre:
+    - nvm install 6
+    - nvm alias default 6
+    - rm -rf ./node_modules
   override:
-    - nvm install 6 && nvm use 6 && npm install && npm run build-client-coverage
+    - npm install
     # prepublish, run with install, only builds the production version of client files
+    - npm run build-client-coverage
+  cache_directories:
+    - ~/.npm
 test:
   override:
     - nvm use 4 && npm run test-server-all
-    - nvm use 6 && npm run ci
+    - npm run ci
 
