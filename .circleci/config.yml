@@ -17,10 +17,10 @@ jobs:
           paths:
             - ~/.npm
       - run:
+          name: Build coverage-flavor JS
+          command: npm run build-client-coverage
+      - run:
           name: Run test
           command: npm run ci
-      - run:
-          name: Build coverage
-          command: npm run build-client-coverage
 
 
